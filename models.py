@@ -52,4 +52,6 @@ class Borrow(db.Model):
     date_due = db.Column(db.DateTime, nullable=False)
     remaining_days = db.Column(db.Integer, nullable=False)
     user = db.relationship('User', backref='borrow', lazy=True)
-    book = db.relationship('Book', backref='borrow', lazy=True)
+
+with app.app_context():
+    db.create_all()
