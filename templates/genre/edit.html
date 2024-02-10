@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+  Edit Genre
+{% endblock %}
+
+{% block content %}
+  <h1 class="display-1"> Edit Genre </h1>
+
+  <form action="" method="post" class="form" enctype="multipart/form-data">
+    <div class="form-group">
+      <label for="name" class="form-label" >Genre Name</label>
+      <input type="text" class="form-control" id="name" name="name" value="{{ genre.name }}" required>
+      <label for="description" class="form-label">Description</label>
+      <textarea class="form-control" id="description" name="description" required>{{ genre.description }}</textarea>
+      <label>Current Image:</label>
+      {% if genre.image %}
+        <img src="{{ url_for('get_genre_image', genre_id=genre.id) }}" alt="Current Image">
+      {% else %}
+        <p>No image available</p>
+      {% endif %}
+      <label>Choose New Image:</label>
+      <input type="file" class="form-control" name="image">
+      <button type="submit" class="btn btn-success"> <i class="fas fa-refresh"></i>  Update</button>
+    </div>
+  </form>
+{% endblock %}

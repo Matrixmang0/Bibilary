@@ -1,5 +1,7 @@
 import re
-from flask import render_template, request, redirect, url_for, flash, session
+from io import BytesIO
+from datetime import date
+from flask import render_template, request, redirect, url_for, flash, session, send_file
 from email_validator import validate_email
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -257,31 +259,109 @@ def logout():
     return redirect(url_for("login"))
 
 
+@app.route("/<int:genre_id>/image")
+def get_genre_image(id):
+    genre = Genre.query.get(id)
+    if genre and genre.image:
+        return send_file(BytesIO(genre.image), mimetype="image/png")
+    else:
+        return send_file("static/placeholder.png", mimetype="image/png")
+
+
 @app.route("/librarian")
 @librarian_required
 def librarian():
-    return render_template("librarian.html")
+    genres = Genre.query.all()
+    return render_template("librarian.html", genres=genres)
 
 
 @app.route("/genre/add")
 @librarian_required
 def add_genre():
-    return render_template("add-genre.html")
+    return render_template("genre/add.html")
+
+
+@app.route("/genre/add", methods=["POST"])
+@librarian_required
+def add_genre_post():
+    name = request.form.get("name")
+    description = request.form.get("description")
+    image = request.files["image"]
+
+    if not name or not description:
+        flash("Please fill all the required fields")
+        return redirect(url_for("add_genre"))
+
+    if Genre.query.filter_by(name=name).first():
+        flash("Genre already exists")
+        return redirect(url_for("add_genre"))
+
+    new_genre = Genre(
+        name=name,
+        date_created=date.today(),
+        description=description,
+        image=image.read() if image else None,
+    )
+    db.session.add(new_genre)
+    db.session.commit()
+
+    flash("Genre added successfully")
+    return redirect(url_for("librarian"))
 
 
 @app.route("/genre/<int:id>/")
 @librarian_required
-def show_category():
+def show_genre(id):
     return "Hello"
 
 
 @app.route("/genre/<int:id>/edit")
 @librarian_required
-def edit_category():
-    return "hello"
+def edit_genre(id):
+    genre = Genre.query.get(id)
+    if not genre:
+        flash("Genre not found")
+        return redirect(url_for("librarian"))
+    return render_template("genre/edit.html", genre=genre)
 
 
-@app.route("/genre/<int:id>/delete")
+@app.route("/genre/<int:id>/edit", methods=["POST"])
 @librarian_required
-def delete_category():
-    return "hello"
+def edit_genre_post(id):
+    name = request.form.get("name")
+    description = request.form.get("description")
+    image = request.files["image"]
+
+    if not name or not description:
+        flash("Please fill all the required fields")
+        return redirect(url_for("edit_genre", id=id))
+
+    genre = Genre.query.get(id)
+    if not genre:
+        flash("Genre not found")
+        return redirect(url_for("librarian"))
+
+    if Genre.query.filter_by(name=name).first() and name != genre.name:
+        flash("Genre already exists")
+        return redirect(url_for("edit_genre", id=id))
+
+    genre.name = name
+    genre.description = description
+    genre.image = image.read() if image else genre.image
+
+    db.session.commit()
+    flash("Genre updated successfully")
+    return redirect(url_for("librarian"))
+
+
+@app.route("/genre/<int:id>/delete", methods=["POST", "GET"])
+@librarian_required
+def delete_genre(id):
+    genre = Genre.query.get(id)
+    if not genre:
+        flash("Genre not found")
+        return redirect(url_for("librarian"))
+    db.session.delete(genre)
+    db.session.commit()
+    flash("Genre deleted successfully")
+    return redirect(url_for("librarian"))

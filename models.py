@@ -28,7 +28,7 @@ class Genre(db.Model):
     name = db.Column(db.String(120), unique=True, nullable=False)
     date_created = db.Column(db.DateTime, nullable=False)
     image = db.Column(db.LargeBinary, nullable=True)
-    description = db.Column(db.String(1024), nullable=False)
+    description = db.Column(db.String, nullable=False)
     books = db.relationship("Book", backref="genre", lazy=True)
 
 

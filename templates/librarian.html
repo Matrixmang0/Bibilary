@@ -8,9 +8,9 @@
   <h1 class="display-1">My Dashboard</h1>
 
   <div class="d-grid gap-2 col-6 mx-auto">
-  <button type="button" href="{{ url_for("add_genre") }}"class="btn btn-success btn-lg">
+  <a type="button" href="{{ url_for("add_genre") }}" class="btn btn-success btn-lg">
     <i class="fas fa-plus"></i> Add Genre
-  </button>
+  </a>
   </div>
 
   <h2 class="display-2">Genres</h2>
@@ -29,18 +29,41 @@
           <td>{{ genre.id }}</td>
           <td>{{ genre.name }}</td>
           <td>
-            <a href="{{ url_for("show_genre", id=genre.id) }}" class="btn btn-warning">
+            <a href="{{ url_for("show_genre", id=genre.id) }}" class="btn btn-info">
               <i class="fas fa-search"></i> Show
             </a>
             <a href="{{ url_for("edit_genre", id=genre.id) }}" class="btn btn-warning">
               <i class="fas fa-edit"></i> Edit
             </a>
-            <a href="{{ url_for("delete_genre", id=genre.id) }}" class="btn btn-danger">
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
               <i class="fas fa-trash"></i> Delete
-            </a>
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Delete {{ genre.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    Are you sure want to delete the genre {{ genre.name }}?
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <a href="{{ url_for("delete_genre", id=genre.id) }}" type="button" class="btn btn-danger" method="post">
+                      <i class="fas fa-trash"></i>  Delete
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </td>
         </tr>
       {% endfor %}
     </tbody>
-
+  </table>
+    
 {% endblock %}
