@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Librarian Dashboard
+{% endblock %}
+
+{% block content %}
+  <h1 class="display-1">My Dashboard</h1>
+
+  <div class="d-grid gap-2 col-6 mx-auto">
+  <button type="button" href="{{ url_for("add_genre") }}"class="btn btn-success btn-lg">
+    <i class="fas fa-plus"></i> Add Genre
+  </button>
+  </div>
+
+  <h2 class="display-2">Genres</h2>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Genre</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for genre in genres %}
+        <tr>
+          <td>{{ genre.id }}</td>
+          <td>{{ genre.name }}</td>
+          <td>
+            <a href="{{ url_for("show_genre", id=genre.id) }}" class="btn btn-warning">
+              <i class="fas fa-search"></i> Show
+            </a>
+            <a href="{{ url_for("edit_genre", id=genre.id) }}" class="btn btn-warning">
+              <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{{ url_for("delete_genre", id=genre.id) }}" class="btn btn-danger">
+              <i class="fas fa-trash"></i> Delete
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+
+{% endblock %}

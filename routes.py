@@ -9,6 +9,21 @@ from app import app
 # --------------- Decorators ---------------
 
 
+def librarian_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if "user_id" not in session:
+            flash("You need to login or register to access this page")
+            return redirect(url_for("login"))
+        librarian = Librarian.query.get(session["user_id"])
+        if not librarian:
+            flash("You are not authorized to access this page")
+            return redirect(url_for("index"))
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 def auth_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -26,6 +41,9 @@ def auth_required(func):
 @app.route("/")
 @auth_required
 def index():
+    user = User.query.get(session["user_id"])
+    if not user:
+        return redirect(url_for("librarian"))
     return render_template("index.html")
 
 
@@ -217,12 +235,12 @@ def change_password_post():
         return redirect(url_for("change_password"))
 
     if user:
-        if user.passhash != check_password_hash(cpassword):
+        if not check_password_hash(user.passhash, cpassword):
             flash("Incorrect password")
             return redirect(url_for("change_password"))
         user.passhash = generate_password_hash(npassword)
     else:
-        if librarian.passhash != check_password_hash(cpassword):
+        if not check_password_hash(librarian.passhash, cpassword):
             flash("Incorrect password")
             return redirect(url_for("change_password"))
         librarian.passhash = generate_password_hash(npassword)
@@ -237,3 +255,33 @@ def change_password_post():
 def logout():
     session.pop("user_id")
     return redirect(url_for("login"))
+
+
+@app.route("/librarian")
+@librarian_required
+def librarian():
+    return render_template("librarian.html")
+
+
+@app.route("/genre/add")
+@librarian_required
+def add_genre():
+    return render_template("add-genre.html")
+
+
+@app.route("/genre/<int:id>/")
+@librarian_required
+def show_category():
+    return "Hello"
+
+
+@app.route("/genre/<int:id>/edit")
+@librarian_required
+def edit_category():
+    return "hello"
+
+
+@app.route("/genre/<int:id>/delete")
+@librarian_required
+def delete_category():
+    return "hello"

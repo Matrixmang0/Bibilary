@@ -13,6 +13,14 @@
    </span>
 </h1>
 
+<div class="profile-img">
+  <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed={{user.username}}" width="100" alt="Profile Image" class="img-fluid" />
+</div>
+
+<div class="alert alert-info" role="alert">
+  <strong>Info:</strong> You can update your profile <here class=""></here>
+</div>
+
 <a href="{{url_for('logout')}}" class="btn btn-danger">Logout</a>
 
 <!-- Form to update Profile -->
@@ -30,7 +38,7 @@
     <label for="email" class="form-label">Email</label>
     <input type="email" name="email" class="form-control" value="{{user.email}}" required />
   </div>
-  <button type="button" href="{{ url_for("change_password") }}" class="btn btn-outline-warning">Change Password</button>
+  <a class="btn btn-warning" href="{{ url_for("change_password") }}" role="button">Change Password</a>
   <button type="submit" class="btn btn-info">Save</button>
 </form>
 

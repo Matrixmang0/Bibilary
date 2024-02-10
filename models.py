@@ -66,6 +66,7 @@ with app.app_context():
     is_librarian_present = db.session.query(Librarian.id).first() is not None
     if not is_librarian_present:
         librarian = Librarian(
+            id=10000,
             username="librarian",
             email="librarian@email.com",
             passhash=generate_password_hash("1234"),
