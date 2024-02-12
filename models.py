@@ -13,6 +13,7 @@ class User(db.Model):
     name = db.Column(db.String(120), nullable=False)
     requests = db.relationship("Request", backref="user", lazy=True)
     borrows = db.relationship("Borrow", backref="user", lazy=True)
+    purchases = db.relationship("Purchase", backref="user", lazy=True)
 
 
 class Librarian(db.Model):
@@ -37,10 +38,14 @@ class Book(db.Model):
     title = db.Column(db.String(120), unique=True, nullable=False)
     authors = db.Column(db.String(120), nullable=False)
     genre_id = db.Column(db.Integer, db.ForeignKey("genre.id"), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    summary = db.Column(db.String, nullable=False)
     image = db.Column(db.LargeBinary, nullable=True)
     content = db.Column(db.LargeBinary, nullable=False)
     requests = db.relationship("Request", backref="book", lazy=True)
     borrows = db.relationship("Borrow", backref="book", lazy=True)
+    purchases = db.relationship("Purchase", backref="book", lazy=True)
 
 
 class Request(db.Model):
@@ -58,6 +63,14 @@ class Borrow(db.Model):
     date_issued = db.Column(db.DateTime, nullable=False)
     date_due = db.Column(db.DateTime, nullable=False)
     remaining_days = db.Column(db.Integer, nullable=False)
+
+
+class Purchase(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
+    date_purchased = db.Column(db.DateTime, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
 
 
 with app.app_context():

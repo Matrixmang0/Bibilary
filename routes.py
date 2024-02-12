@@ -312,7 +312,11 @@ def add_genre_post():
 @app.route("/genre/<int:id>/")
 @librarian_required
 def show_genre(id):
-    return "Hello"
+    genre = Genre.query.get(id)
+    if not genre:
+        flash("Genre not found")
+        return redirect(url_for("librarian"))
+    return render_template("genre/show.html", genre=genre)
 
 
 @app.route("/genre/<int:id>/edit")
@@ -351,6 +355,45 @@ def edit_genre_post(id):
 
     db.session.commit()
     flash("Genre updated successfully")
+    return redirect(url_for("librarian"))
+
+
+@app.route("/<int:genre_id>/book/add")
+@librarian_required
+def add_book(genre_id):
+    genres = Genre.query.all()
+    genre = Genre.query.get(genre_id)
+    if not genre:
+        flash("Genre not found")
+        return redirect(url_for("librarian"))
+    return render_template("book/add.html", genre=genre, genres=genres)
+
+
+@app.route("/<int:genre_id>/book/add", methods=["POST"])
+@librarian_required
+def add_book_post():
+    name = request.form.get("name")
+    description = request.form.get("description")
+    image = request.files["image"]
+
+    if not name or not description:
+        flash("Please fill all the required fields")
+        return redirect(url_for("add_genre"))
+
+    if Genre.query.filter_by(name=name).first():
+        flash("Genre already exists")
+        return redirect(url_for("add_genre"))
+
+    new_genre = Genre(
+        name=name,
+        date_created=date.today(),
+        description=description,
+        image=image.read() if image else None,
+    )
+    db.session.add(new_genre)
+    db.session.commit()
+
+    flash("Genre added successfully")
     return redirect(url_for("librarian"))
 
 

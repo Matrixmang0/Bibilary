@@ -1,35 +1,35 @@
 {% extends "layout.html" %}
 
 {% block title %}
-  Librarian Dashboard
+  Books of {{ genre.name}} genre
 {% endblock %}
 
 {% block content %}
-  <h1 class="display-1">My Dashboard</h1>
+  <h1 class="display-1">Books of {{ genre.name}} genre</h1>
 
   <div class="d-grid gap-2 col-6 mx-auto">
-  <a type="button" href="{{ url_for("add_genre") }}" class="btn btn-success btn-lg">
-    <i class="fas fa-plus"></i> Add Genre
+  <a type="button" href="{{ url_for("add_book", genre_id=genre.id) }}" class="btn btn-success btn-lg">
+    <i class="fas fa-plus"></i> Add Books
   </a>
   </div>
-
-  <h2 class="display-2">Genres</h2>
 
   <table class="table table-striped">
     <thead>
       <tr>
-        <th>Genre ID</th>
-        <th>Genre</th>
-        <th>No of Books</th>
+        <th>Book ID</th>
+        <th>Book Name</th>
+        <th>Quantity</th>
+        <th>Price</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      {% for genre in genres %}
+      {% for book in genre.books %}
         <tr>
-          <td>{{ genre.id }}</td>
-          <td>{{ genre.name }}</td>
-          <td>{{ genre.books | length }}</td>
+          <td>{{ book.id }}</td>
+          <td>{{ book.name }}</td>
+          <td>{{ book.quantity }}</td>
+          <td>{{ book.price }}</td>
           <td>
             <a href="{{ url_for("show_genre", id=genre.id) }}" class="btn btn-info">
               <i class="fas fa-search"></i> Show

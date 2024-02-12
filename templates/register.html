@@ -6,32 +6,48 @@
 
 {% block content %}
 
-<h1 class="display-1">Registration</h1>
+<h1 class="display-1 text-center"><b>Registration</b></h1>
 
-<form action="" class="form" method="post">
-  <div class="form-group">
+<div class="card text-dark bg-light mb-3" style="width: 28rem; height: 42rem">
+  <br>
+<div class="container">
+<form method="post">
+  <div class="mb-3">
     <label for="username" class="form-label">Username</label>
     <input type="text" name="username" class="form-control" required />
   </div>
-  <div class="form-group">
+  <div class="mb-3">
     <label for="email" class="form-label">Email</label>
     <input type="email" name="email" class="form-control" required />
     <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
   </div>
-  <div class="form-group">
+  <div class="mb-3">
     <label for="name" class="form-label">Name</label>
     <input type="text" name="name" class="form-control" required />
   </div>
-  <div class="form-group">
+  <div class="mb-3">
     <label for="password" class="form-label">Password</label>
-    <input type="password" name="password" class="form-control" required />
+    <input type="password" name="password" class="form-control" aria-describedby="passwordHelpBlock" required />
+  <div id="passwordHelpBlock" class="form-text">
+    Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces, special characters, or emoji.
   </div>
-  <div class="form-group">
+  </div>
+  <div class="mb-3">
     <label for="confirm_password" class="form-label">Confirm Password</label>
     <input type="password" name="confirm_password" class="form-control" required />
   </div>
-  <div class="form-group">
-    <button type="submit" class="btn btn-success">Register</button>
+  <br>
+  <div class="mb-3">
+    <p class="text-center"><button type="submit" class="btn btn-primary btn-lg">Register</button></p>
 </form>
+</div>
+</div>
+
+<style>
+    .container {
+      width: 400px;
+      margin-top: 15px;
+    }
+  </style>
 
 {% endblock %}

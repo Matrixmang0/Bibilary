@@ -22,17 +22,9 @@
   </head>
   <body>
     {% include 'navbar.html' with context %}
+    {% include 'messages.html' with context%}
     <div class="container">
-      {% with messages = get_flashed_messages() %} 
-        {% if messages %}
-        <ul class="flashes">
-          {% for message in messages %}
-          <div class="alert alert-danger" role="alert">{{ message }}</div>
-          {% endfor %}
-        </ul>
-        {% endif %} 
-      {% endwith %} 
-      
+       
       {% block content %} 
       
       {% endblock %}
