@@ -1,0 +1,54 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+  Edit Book {{ book.title }}
+{% endblock %}
+
+{% block content %}
+  <h1 class="display-1"> Edit Book {{ book.title }} </h1>
+
+  <form action="" method="post" class="form" enctype="multipart/form-data">
+    <div class="form-group">
+      <label for="title" class="form-label">Book Title</label>
+      <input type="text" class="form-control" id="title" name="title" value="{{ book.title }}" required>
+
+      <label for="authors" class="form-label">Authors</label>
+      <input type="text" class="form-control" id="authors" name="authors" value="{{ book.authors }}" required>
+
+      <label for="genre_id" class="form-label">Genre</label>
+      <select class="form-select" id="genre_id" name="genre_id" required>
+        <option value="">Select Genre</option>
+        {% for gen in genres %}
+        {% if genre.id == gen.id %}
+          <option selected value="{{ gen.id }}">{{ gen.name }}</option>
+        {% else %}
+          <option value="{{ gen.id }}">{{ gen.name }}</option>
+        {% endif %}
+        {% endfor %}
+      </select>
+
+      <label for="quantity" class="form-label">Quantity</label>
+      <input type="number" class="form-control" id="quantity" min="1" name="quantity" value="{{ book.quantity }}" required>
+
+      <label for="price" class="form-label">Price</label>
+      <input type="number" class="form-control" id="price" min="0" step="any" name="price" value="{{ book.price }}" required>
+
+      <label for="summary" class="form-label">Summary</label>
+      <textarea class="form-control" id="summary" name="summary" required>{{ book.summary }}</textarea>
+
+      <label for="image" class="form-label">Current Image</label>
+      <img src="{{ url_for('get_genre_image', genre_id=genre.id) }}" alt="Current Image">
+
+      <label for="image" class="form-label">Choose New Image</label>
+      <input type="file" class="form-control" name="image">
+
+      <label for="content" class="form-label">Current Content</label>
+      <img src="{{ url_for('get_genre_image', genre_id=genre.id) }}" alt="Current Content">
+
+      <label for="image" class="form-label">Choose New Content</label>
+      <input type="file" class="form-control" name="content">
+
+      <button type="submit" class="btn btn-success"> <i class="fas fa-refresh"></i>  Update</button>
+    </div>
+  </form>
+{% endblock %}

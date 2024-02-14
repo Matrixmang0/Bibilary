@@ -1,3 +1,77 @@
-{% extends 'layout.html' %} 
+{% extends 'layout.html' %}
 
-{% block content %} Welcome to Bibilary! {% endblock%}
+{% block title %}{% endblock %}
+
+{% block content %}
+  {% include 'searchbar.html' with context %}
+
+  {% include 'carousel.html' with context %}
+
+  <hr>
+
+  <div class="showcase-books">
+    {% for genre in genres %}
+      <div class="genres">
+        <h2>{{genre.name}}</h2>
+        <hr>
+         <div class="books">
+               {% for book in genre.books %}
+                    <div class="card" style="width: 14rem;">
+                      <img src="https://picsum.photos/1000/1000" class="card-img-top" alt="...">
+                      <div class="card-body">
+                        <h5 class="card-title"><strong>{{ book.title }}</strong></h5>
+                        <p class="card-text"><span class="text-muted">Price :</span>&nbsp;&nbsp;<span style="color:red;">&#8377;{{ book.price }}</span></p>
+                        <div class="card-buttons">
+                          <a href="{{ url_for("add_to_cart", book_id=book.id) }}" class="btn btn-success">Add to cart</a>
+                          <a href="#" class="btn btn-primary">Borrow</a>
+                        </div>
+                      </div>
+                    </div>
+               {% endfor %}
+         </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}
+
+
+
+{% block style %}
+<style>
+  .carousel-image {
+    width: 100%;
+    height: 300px;
+  }
+
+  .carousel {
+    margin: 20px 10px 20px 10px;
+  }
+
+  .showcase-books {
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+  }
+
+  .genres {
+    margin: 20px 0 20px 0;
+  }
+
+  .books {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+  }
+
+  .card {
+    margin: 10px;
+  }
+
+  .card-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+</style>
+{% endblock %}
+

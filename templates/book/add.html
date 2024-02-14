@@ -7,7 +7,7 @@
 {% block content %}
   <h1 class="display-1"> Add Book </h1>
 
-  <form action="" method="post" class="form" enctype="multipart/form-data">
+  <form action="{{url_for("add_book_post", genre_id=genre.id)}}" method="post" class="form" enctype="multipart/form-data">
     <div class="form-group">
       <label for="title" class="form-label">Book Title</label>
       <input type="text" class="form-control" id="title" name="title" required>
@@ -28,10 +28,10 @@
       </select>
 
       <label for="quantity" class="form-label">Quantity</label>
-      <input type="number" class="form-control" id="quantity" name="quantity" step="1" required>
+      <input type="number" class="form-control" id="quantity" min="1" name="quantity" required>
 
       <label for="price" class="form-label">Price</label>
-      <input type="number" class="form-control" id="price" name="price" required>
+      <input type="number" class="form-control" id="price" min="0" step="any" name="price" required>
 
       <label for="summary" class="form-label">Summary</label>
       <textarea class="form-control" id="summary" name="summary" required></textarea>

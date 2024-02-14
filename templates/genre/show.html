@@ -1,16 +1,19 @@
 {% extends "layout.html" %}
 
 {% block title %}
-  Books of {{ genre.name}} genre
+  {{ genre.name}} Books
 {% endblock %}
 
 {% block content %}
-  <h1 class="display-1">Books of {{ genre.name}} genre</h1>
+  <h1 class="display-1">{{ genre.name}} Books</h1>
 
-  <div class="d-grid gap-2 col-6 mx-auto">
-  <a type="button" href="{{ url_for("add_book", genre_id=genre.id) }}" class="btn btn-success btn-lg">
-    <i class="fas fa-plus"></i> Add Books
-  </a>
+  <div class="heading">
+    <h2 class="text-muted">Books</h2>
+    <div class="d-grid gap-2 col-6 mx-auto">
+    <a type="button" href="{{ url_for("add_book", genre_id=genre.id) }}" class="btn btn-success btn-lg">
+      <i class="fas fa-plus"></i> Add Books
+    </a>
+    </div>
   </div>
 
   <table class="table table-striped">
@@ -27,14 +30,11 @@
       {% for book in genre.books %}
         <tr>
           <td>{{ book.id }}</td>
-          <td>{{ book.name }}</td>
+          <td>{{ book.title }}</td>
           <td>{{ book.quantity }}</td>
           <td>{{ book.price }}</td>
           <td>
-            <a href="{{ url_for("show_genre", id=genre.id) }}" class="btn btn-info">
-              <i class="fas fa-search"></i> Show
-            </a>
-            <a href="{{ url_for("edit_genre", id=genre.id) }}" class="btn btn-warning">
+            <a href="{{ url_for("edit_book", genre_id=book.genre_id, book_id=book.id) }}" class="btn btn-warning">
               <i class="fas fa-edit"></i> Edit
             </a>
             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
@@ -46,15 +46,15 @@
               <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">Delete {{ genre.name }}</h5>
+                    <h5 class="modal-title" id="staticBackdropLabel">Delete {{ book.title }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
-                    Are you sure want to delete the genre {{ genre.name }}?
+                    Are you sure want to delete the book {{ book.title }} from the genre {{ genre.name }}?
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <a href="{{ url_for("delete_genre", id=genre.id) }}" type="button" class="btn btn-danger" method="post">
+                    <a href="{{ url_for("delete_book", book_id=book.id, genre_id=book.genre_id) }}" type="button" class="btn btn-danger" method="post">
                       <i class="fas fa-trash"></i>  Delete
                     </a>
                   </div>
@@ -68,4 +68,16 @@
     </tbody>
   </table>
     
+{% endblock %}
+
+
+{% block style %}
+  <style>
+    .heading {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
 {% endblock %}

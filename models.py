@@ -11,9 +11,18 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     passhash = db.Column(db.String(256), nullable=False)
     name = db.Column(db.String(120), nullable=False)
-    requests = db.relationship("Request", backref="user", lazy=True)
-    borrows = db.relationship("Borrow", backref="user", lazy=True)
-    purchases = db.relationship("Purchase", backref="user", lazy=True)
+    requests = db.relationship(
+        "Request", cascade="all, delete-orphan", backref="user", lazy=True
+    )
+    borrows = db.relationship(
+        "Borrow", cascade="all, delete-orphan", backref="user", lazy=True
+    )
+    purchases = db.relationship(
+        "Purchase", cascade="all, delete-orphan", backref="user", lazy=True
+    )
+    carts = db.relationship(
+        "Cart", cascade="all, delete-orphan", backref="user", lazy=True
+    )
 
 
 class Librarian(db.Model):
@@ -30,7 +39,9 @@ class Genre(db.Model):
     date_created = db.Column(db.DateTime, nullable=False)
     image = db.Column(db.LargeBinary, nullable=True)
     description = db.Column(db.String, nullable=False)
-    books = db.relationship("Book", backref="genre", lazy=True)
+    books = db.relationship(
+        "Book", cascade="all, delete-orphan", backref="genre", lazy=True
+    )
 
 
 class Book(db.Model):
@@ -43,9 +54,18 @@ class Book(db.Model):
     summary = db.Column(db.String, nullable=False)
     image = db.Column(db.LargeBinary, nullable=True)
     content = db.Column(db.LargeBinary, nullable=False)
-    requests = db.relationship("Request", backref="book", lazy=True)
-    borrows = db.relationship("Borrow", backref="book", lazy=True)
-    purchases = db.relationship("Purchase", backref="book", lazy=True)
+    requests = db.relationship(
+        "Request", cascade="all, delete-orphan", backref="book", lazy=True
+    )
+    borrows = db.relationship(
+        "Borrow", cascade="all, delete-orphan", backref="book", lazy=True
+    )
+    purchases = db.relationship(
+        "Purchase", cascade="all, delete-orphan", backref="book", lazy=True
+    )
+    carts = db.relationship(
+        "Cart", cascade="all, delete-orphan", backref="book", lazy=True
+    )
 
 
 class Request(db.Model):
@@ -70,6 +90,13 @@ class Purchase(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
     date_purchased = db.Column(db.DateTime, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+
+
+class Cart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
 
 

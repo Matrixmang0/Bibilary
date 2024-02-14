@@ -5,7 +5,7 @@ from flask import render_template, request, redirect, url_for, flash, session, s
 from email_validator import validate_email
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from models import User, Librarian, Genre, Book, Request, Borrow, db
+from models import User, Librarian, Genre, Book, Request, Borrow, Cart, db
 from app import app
 
 # --------------- Decorators ---------------
@@ -38,15 +38,6 @@ def auth_required(func):
 
 
 # ----------------- Routes -----------------
-
-
-@app.route("/")
-@auth_required
-def index():
-    user = User.query.get(session["user_id"])
-    if not user:
-        return redirect(url_for("librarian"))
-    return render_template("index.html")
 
 
 @app.route("/register")
@@ -358,6 +349,19 @@ def edit_genre_post(id):
     return redirect(url_for("librarian"))
 
 
+@app.route("/genre/<int:id>/delete", methods=["POST", "GET"])
+@librarian_required
+def delete_genre(id):
+    genre = Genre.query.get(id)
+    if not genre:
+        flash("Genre not found")
+        return redirect(url_for("librarian"))
+    db.session.delete(genre)
+    db.session.commit()
+    flash("Genre deleted successfully")
+    return redirect(url_for("librarian"))
+
+
 @app.route("/<int:genre_id>/book/add")
 @librarian_required
 def add_book(genre_id):
@@ -371,40 +375,178 @@ def add_book(genre_id):
 
 @app.route("/<int:genre_id>/book/add", methods=["POST"])
 @librarian_required
-def add_book_post():
-    name = request.form.get("name")
-    description = request.form.get("description")
+def add_book_post(genre_id):
+    title = request.form.get("title")
+    authors = request.form.get("authors")
+    genre_id_f = request.form.get("genre_id")
+    quantity = request.form.get("quantity")
+    price = request.form.get("price")
+    summary = request.form.get("summary")
     image = request.files["image"]
+    content = request.files["content"]
 
-    if not name or not description:
+    if (
+        not title
+        or not authors
+        or not genre_id_f
+        or not quantity
+        or not price
+        or not summary
+        or not image
+        or not content
+    ):
         flash("Please fill all the required fields")
-        return redirect(url_for("add_genre"))
+        return redirect(url_for("add_book", genre_id=genre_id))
 
-    if Genre.query.filter_by(name=name).first():
-        flash("Genre already exists")
-        return redirect(url_for("add_genre"))
+    if Book.query.filter_by(title=title).first():
+        flash("Book already exists")
+        return redirect(url_for("add_book", genre_id=genre_id))
 
-    new_genre = Genre(
-        name=name,
-        date_created=date.today(),
-        description=description,
-        image=image.read() if image else None,
+    try:
+        quantity = int(quantity)
+    except ValueError:
+        flash("Invalid quantity")
+        return redirect(url_for("add_book", genre_id=genre_id))
+
+    try:
+        price = float(price)
+    except ValueError:
+        flash("Invalid price")
+        return redirect(url_for("add_book", genre_id=genre_id))
+
+    if int(quantity) <= 0:
+        flash("Quantity should be a positive integer")
+        return redirect(url_for("add_book", genre_id=genre_id))
+
+    if float(price) < 0:
+        flash("Price should be a positive float")
+        return redirect(url_for("add_book", genre_id=genre_id))
+
+    book = Book(
+        title=title,
+        authors=authors,
+        genre_id=genre_id_f,
+        quantity=quantity,
+        price=price,
+        summary=summary,
+        image=image.read(),
+        content=content.read(),
     )
-    db.session.add(new_genre)
+
+    db.session.add(book)
     db.session.commit()
 
-    flash("Genre added successfully")
-    return redirect(url_for("librarian"))
+    flash("Book added successfully")
+    return redirect(url_for("show_genre", id=genre_id_f))
 
 
-@app.route("/genre/<int:id>/delete", methods=["POST", "GET"])
+@app.route("/<int:genre_id>/book/<int:book_id>/edit")
 @librarian_required
-def delete_genre(id):
-    genre = Genre.query.get(id)
+def edit_book(genre_id, book_id):
+    genres = Genre.query.all()
+    genre = Genre.query.get(genre_id)
+    book = Book.query.get(book_id)
+    if not genre or not book:
+        flash("Genre or book not found")
+        return redirect(url_for("librarian"))
+    return render_template("book/edit.html", genre=genre, genres=genres, book=book)
+
+
+@app.route("/<int:genre_id>/book/<int:book_id>/edit", methods=["POST"])
+@librarian_required
+def edit_book_post(genre_id, book_id):
+
+    title = request.form.get("title")
+    authors = request.form.get("authors")
+    genre_id_f = request.form.get("genre_id")
+    quantity = request.form.get("quantity")
+    price = request.form.get("price")
+    summary = request.form.get("summary")
+    image = request.files["image"]
+    content = request.files["content"]
+
+    if (
+        not title
+        or not authors
+        or not genre_id_f
+        or not quantity
+        or not price
+        or not summary
+    ):
+        flash("Please fill all the required fields")
+        return redirect(url_for("edit_book", genre_id=genre_id, book_id=book_id))
+
+    genre = Genre.query.get(genre_id_f)
     if not genre:
         flash("Genre not found")
-        return redirect(url_for("librarian"))
-    db.session.delete(genre)
+        return redirect(url_for("edit_book", genre_id=genre_id, book_id=book_id))
+
+    book = Book.query.get(book_id)
+    if not book:
+        flash("Book not found")
+        return redirect(url_for("edit_book", genre_id=genre_id, book_id=book_id))
+
+    if Book.query.filter_by(title=title).first() and title != book.title:
+        flash("Book already exists")
+        return redirect(url_for("edit_book", genre_id=genre_id, book_id=book_id))
+
+    book.title = title
+    book.authors = authors
+    book.genre_id = genre_id_f
+    book.quantity = quantity
+    book.price = price
+    book.summary = summary
+    book.image = image.read() if image else book.image
+    book.content = content.read() if content else book.content
+
     db.session.commit()
-    flash("Genre deleted successfully")
-    return redirect(url_for("librarian"))
+    flash("Book updated successfully")
+    return redirect(url_for("show_genre", id=genre_id_f))
+
+
+@app.route("/<int:genre_id>/genre/<int:book_id>/delete", methods=["POST", "GET"])
+@librarian_required
+def delete_book(book_id, genre_id):
+    book = Book.query.get(book_id)
+    if not book:
+        flash("Book not found")
+        return redirect(url_for("show_genre", id=genre_id))
+    db.session.delete(book)
+    db.session.commit()
+    flash("book deleted successfully")
+    return redirect(url_for("show_genre", id=genre_id))
+
+
+# --------------- User routes --------------
+
+
+@app.route("/")
+def index():
+    user = User.query.get(session["user_id"])
+    if not user:
+        return redirect(url_for("librarian"))
+    genres = Genre.query.all()
+    books = Book.query.all()
+    return render_template("index.html", genres=genres, books=books)
+
+
+@app.route("/add_to_cart/<int:book_id>", methods=["POST"])
+@auth_required
+def add_to_cart(book_id):
+    book = Book.query.get(book_id)
+    if not book:
+        flash("Book not found")
+        return redirect(url_for("index"))
+    cart = Cart.query.filter_by(user_id=session["user_id"], book_id=book_id).first()
+    if cart:
+        if cart.quantity < book.quantity:
+            cart.quantity += 1
+        else:
+            flash("Book out of stock")
+    else:
+        cart = Cart(user_id=session["user_id"], book_id=book_id, quantity=1)
+    db.session.add(cart)
+    db.session.commit()
+
+    flash("Book added to cart successfully")
+    return redirect(url_for("cart"))
