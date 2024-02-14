@@ -3,7 +3,6 @@
 {% block title %}{% endblock %}
 
 {% block content %}
-  {% include 'searchbar.html' with context %}
 
   {% include 'carousel.html' with context %}
 
@@ -16,6 +15,7 @@
         <hr>
          <div class="books">
                {% for book in genre.books %}
+                {% if (parameter=="book" and query.lower() in book.title.lower()) or (parameter == "price" and query >= book.price) or (parameter=="genre") or (not parameter) %}
                     <div class="card" style="width: 14rem;">
                       <img src="https://picsum.photos/1000/1000" class="card-img-top" alt="...">
                       <div class="card-body">
@@ -27,6 +27,7 @@
                         </div>
                       </div>
                     </div>
+                {% endif %}
                {% endfor %}
          </div>
       </div>
@@ -38,6 +39,7 @@
 
 {% block style %}
 <style>
+
   .carousel-image {
     width: 100%;
     height: 300px;

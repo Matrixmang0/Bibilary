@@ -527,7 +527,41 @@ def index():
         return redirect(url_for("librarian"))
     genres = Genre.query.all()
     books = Book.query.all()
-    return render_template("index.html", genres=genres, books=books)
+
+    parameter = request.args.get("parameter")
+    query = request.args.get("query")
+
+    param_dict = {"genre": "Genre Name", "book": "Book Title", "price": "Max Price"}
+
+    if parameter == "genre":
+        genres = Genre.query.filter(Genre.name.ilike(f"%{query}%")).all()
+    elif parameter == "book":
+        return render_template(
+            "index.html",
+            genres=genres,
+            books=books,
+            parameter=parameter,
+            query=query,
+            param_dict=param_dict,
+        )
+    elif parameter == "price":
+        return render_template(
+            "index.html",
+            genres=genres,
+            books=books,
+            parameter=parameter,
+            query=float(query),
+            param_dict=param_dict,
+        )
+
+    return render_template(
+        "index.html",
+        genres=genres,
+        books=books,
+        param_dict=param_dict,
+        parameter=parameter,
+        query=query,
+    )
 
 
 @app.route("/add_to_cart/<int:book_id>", methods=["POST"])
