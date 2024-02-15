@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "hongquan.dragon-jinja",
+    "noxiz.jinja-snippets",
+    "samuelcolvin.jinjahtml",
+    "wholroyd.jinja",
+    "formulahendry.auto-rename-tag",
+    "amazonwebservices.aws-toolkit-vscode",
+    "jeff-hykin.better-cpp-syntax",
+    "ms-python.black-formatter",
+    "thekalinga.bootstrap4-vscode",
+    "github.copilot",
+    "esbenp.prettier-vscode"
+  ]
+}

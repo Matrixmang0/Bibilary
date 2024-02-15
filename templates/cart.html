@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+
+{% block title %}My Cart{% endblock %}
+
+{% block content %}
+    <h1 class="display-1">My Cart</h1>
+
+    {% if cart|length > 0 %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th><!--Image--></th>
+                <th>Book Title</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart %}
+                <tr>
+                    <td><img src="{{ item.book.image }}" alt="{{ item.book.title }}" width="100"></td>
+                    <td>{{ item.book.title }}</td>
+                    <td>{{ item.book.price }}</td>
+                    <td><input class="form-control" type="number" id="quantity" name="quantity" min="1" max="{{ item.book.quantity }}" value="{{ item.quantity }}"></td>
+                    <td>{{ item.book.price * item.quantity }}</td>
+                    <td>
+                        <form action="{{ url_for('delete_cart', cart_id=item.id) }}" method="post">
+                            <button type="submit" class="btn btn-danger"><i class="fa fa-trash" aria-hidden="true"></i> Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" text-align="center"><strong>Total</strong></td>
+                <td>{{ total }}</td>
+                <td>
+                  <form action="{{ url_for('checkout') }}" method="post">
+                    <button type="submit" class="btn btn-success"><i class="fa fa-shopping-cart" aria-hidden="true"></i> Checkout</button>
+                  </form>
+                </td>
+            </tr>
+    </table>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <h5>Your cart is empty</h5>
+        </div>
+    {% endif %}
+
+{% endblock %}

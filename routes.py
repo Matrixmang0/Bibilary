@@ -1,11 +1,11 @@
 import re
 from io import BytesIO
-from datetime import date
+from datetime import datetime
 from flask import render_template, request, redirect, url_for, flash, session, send_file
 from email_validator import validate_email
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from models import User, Librarian, Genre, Book, Request, Borrow, Cart, db
+from models import User, Librarian, Genre, Book, Request, Borrow, Purchase, Cart, db
 from app import app
 
 # --------------- Decorators ---------------
@@ -289,7 +289,7 @@ def add_genre_post():
 
     new_genre = Genre(
         name=name,
-        date_created=date.today(),
+        date_created=datetime.now(),
         description=description,
         image=image.read() if image else None,
     )
@@ -522,8 +522,7 @@ def delete_book(book_id, genre_id):
 
 @app.route("/")
 def index():
-    user = User.query.get(session["user_id"])
-    if not user:
+    if session.get("user_id") == 10000:
         return redirect(url_for("librarian"))
     genres = Genre.query.all()
     books = Book.query.all()
@@ -543,6 +542,7 @@ def index():
             parameter=parameter,
             query=query,
             param_dict=param_dict,
+            show_search=True,
         )
     elif parameter == "price":
         return render_template(
@@ -552,6 +552,7 @@ def index():
             parameter=parameter,
             query=float(query),
             param_dict=param_dict,
+            show_search=True,
         )
 
     return render_template(
@@ -561,10 +562,11 @@ def index():
         param_dict=param_dict,
         parameter=parameter,
         query=query,
+        show_search=True,
     )
 
 
-@app.route("/add_to_cart/<int:book_id>", methods=["POST"])
+@app.route("/add_to_cart/<int:book_id>", methods=["POST", "GET"])
 @auth_required
 def add_to_cart(book_id):
     book = Book.query.get(book_id)
@@ -584,3 +586,94 @@ def add_to_cart(book_id):
 
     flash("Book added to cart successfully")
     return redirect(url_for("cart"))
+
+
+@app.route("/cart")
+@auth_required
+def cart():
+    cart = Cart.query.filter_by(user_id=session["user_id"]).all()
+    total = sum([item.book.price * item.quantity for item in cart])
+    return render_template("cart.html", cart=cart, total=total)
+
+
+@app.route("/cart/<int:cart_id>/delete", methods=["POST", "GET"])
+@auth_required
+def delete_cart(cart_id):
+    cart = Cart.query.get(cart_id)
+    if not cart:
+        flash("Item not found")
+        return redirect(url_for("cart"))
+    if cart.user_id != session["user_id"]:
+        flash("You are not authorized to delete this item")
+        return redirect(url_for("cart"))
+    db.session.delete(cart)
+    db.session.commit()
+    flash("Item deleted successfully")
+    return redirect(url_for("cart"))
+
+
+@app.route("/checkout", methods=["POST", "GET"])
+@auth_required
+def checkout():
+    cart = Cart.query.filter_by(user_id=session["user_id"]).all()
+    if not cart:
+        flash("Cart is empty")
+        return redirect(url_for("cart"))
+    purchase = Purchase(user_id=session["user_id"], date_purchased=datetime.now())
+    for item in cart:
+        purchase.book_id = item.book_id
+        purchase.quantity = item.quantity
+        if item.book.quantity < item.quantity:
+            flash("Book out of stock")
+            return redirect(url_for("cart"))
+        item.book.quantity -= item.quantity
+        db.session.add(purchase)
+        db.session.delete(item)
+    db.session.commit()
+    flash("Purchase successful")
+    return redirect(url_for("my_books"))
+
+
+@app.route("/my_books")
+@auth_required
+def my_books():
+    genres = Genre.query.all()
+    books = Book.query.all()
+
+    parameter = request.args.get("parameter")
+    query = request.args.get("query")
+
+    param_dict = {"genre": "Genre Name", "book": "Book Title", "price": "Max Price"}
+
+    if parameter == "genre":
+        genres = Genre.query.filter(Genre.name.ilike(f"%{query}%")).all()
+    elif parameter == "book":
+        return render_template(
+            "my-books.html",
+            genres=genres,
+            books=books,
+            parameter=parameter,
+            query=query,
+            param_dict=param_dict,
+            show_search=True,
+        )
+    elif parameter == "price":
+        return render_template(
+            "my-books.html",
+            genres=genres,
+            books=books,
+            parameter=parameter,
+            query=float(query),
+            param_dict=param_dict,
+            show_search=True,
+        )
+
+    return render_template(
+        "my-books.html",
+        genres=genres,
+        books=books,
+        param_dict=param_dict,
+        parameter=parameter,
+        query=query,
+        show_search=True,
+    )

@@ -38,6 +38,12 @@
 
       {% include 'searchbar.html' with context %}
 
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.endpoint == 'cart' }}" href="{{ url_for('cart') }}"><i class="fa-solid fa-cart-shopping"></i> Cart</a>
+        </li>
+      </ul>
+
       <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
 
         <div class="dropdown" style="margin: 2px 2px ;">

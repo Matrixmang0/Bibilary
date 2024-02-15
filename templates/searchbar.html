@@ -1,13 +1,31 @@
-  <div class="input-group mb-3">
-  <select name="parameter" class="form-select w-10">
-            {% for key in param_dict %}
-              {% if key == parameter %}
-                <option value="{{ key }}" selected>{{ param_dict[key] }}</option>
-              {% else %}
-                <option value="{{ key }}">{{ param_dict[key] }}</option>
-              {% endif %}
-            {% endfor %}
-          </select>
-  <input type="text" class="form-control w-80" placeholder="Search" aria-label="Text input with dropdown button" value="{{ query if query }}">
-  <button class="btn btn-outline-success" type="submit"><i class="fas fa-search"></i></button>
+
+{% if show_search %}
+
+<div class="search-box">
+  <form action="" method="get">
+    <div class="input-group mb-3">
+            <select name="parameter" class="form-select">
+                {% for key in param_dict %}
+                  {% if key == parameter %}
+                    <option value="{{ key }}" selected>{{ param_dict[key] }}</option>
+                  {% else %}
+                    <option value="{{ key }}">{{ param_dict[key] }}</option>
+                  {% endif %}
+                {% endfor %}
+            </select>
+      <input type="text" class="form-control" name="query" placeholder="Search" aria-label="Text input with dropdown button" value="{{ query if query }}">
+      <button class="btn btn-outline-success" type="submit"><i class="fas fa-search"></i></button>
+    </div>
+  </form>
 </div>
+
+<style>
+
+  .search-box {
+    justify-content: center;
+    margin-top: 15px;
+  }
+
+</style>
+
+{% endif %}
