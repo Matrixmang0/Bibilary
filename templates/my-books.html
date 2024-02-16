@@ -13,19 +13,21 @@
         <hr>
          <div class="books">
                {% for book in genre.books %}
-                {% if (parameter=="book" and query.lower() in book.title.lower()) or (parameter == "price" and query >= book.price) or (parameter=="genre") or (not parameter) %}
-                    <div class="card" style="width: 14rem;">
-                      <img src="https://picsum.photos/1000/1000" class="card-img-top" alt="...">
-                      <div class="card-body">
-                        <h5 class="card-title"><strong>{{ book.title }}</strong></h5>
-                        <p class="card-text"><span class="text-muted">Price :</span>&nbsp;&nbsp;<span style="color:red;">&#8377;{{ book.price }}</span></p>
-                        <div class="card-buttons">
-                          <a href="{{ url_for("add_to_cart", book_id=book.id) }}" method="post" class="btn btn-success">Add to cart</a>
-                          <a href="#" class="btn btn-primary">Borrow</a>
+                  {% if book in books %}
+                    {% if (parameter=="book" and query.lower() in book.title.lower()) or (parameter == "price" and query >= book.price) or (parameter=="genre") or (not parameter) %}
+                        <div class="card" style="width: 14rem;">
+                          <img src="https://picsum.photos/1000/1000" class="card-img-top" alt="...">
+                          <div class="card-body">
+                            <h5 class="card-title"><strong>{{ book.title }}</strong></h5>
+                            <p class="card-text"><span class="text-muted">Price :</span>&nbsp;&nbsp;<span style="color:red;">&#8377;{{ book.price }}</span></p>
+                            <div class="card-buttons">
+                              <a href="{{ url_for("add_to_cart", book_id=book.id) }}" method="post" class="btn btn-success">Add to cart</a>
+                              <a href="#" class="btn btn-primary">Borrow</a>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                {% endif %}
+                    {% endif %}
+                  {% endif %}
                {% endfor %}
          </div>
       </div>

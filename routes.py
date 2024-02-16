@@ -621,14 +621,40 @@ def checkout():
         return redirect(url_for("cart"))
     purchase = Purchase(user_id=session["user_id"], date_purchased=datetime.now())
     for item in cart:
-        purchase.book_id = item.book_id
-        purchase.quantity = item.quantity
-        if item.book.quantity < item.quantity:
+        quantity = int(request.form.get(f"quantity_{item.id}"))
+        item_already_purchased = Purchase.query.filter_by(
+            user_id=session["user_id"], book_id=item.book_id
+        ).first()
+        if item_already_purchased and item.book.quantity >= item.quantity:
+            item_already_purchased.quantity += quantity
+            item.book.quantity -= quantity
+            db.session.add(item_already_purchased)
+            db.session.delete(item)
+        elif (
+            item_already_purchased
+            and item.book.quantity < item.quantity
+            and item.book.quantity > 0
+        ):
+            flash(
+                f"Reduced quantity of book {item.book.title} to {item.book.quantity} from {quantity} in cart"
+            )
+            return redirect(url_for("cart"))
+        elif (
+            item_already_purchased
+            and item.book.quantity < item.quantity
+            and item.book.quantity == 0
+        ):
             flash("Book out of stock")
             return redirect(url_for("cart"))
-        item.book.quantity -= item.quantity
-        db.session.add(purchase)
-        db.session.delete(item)
+        else:
+            purchase.book_id = item.book_id
+            purchase.quantity = quantity
+            if item.book.quantity < item.quantity:
+                flash("Book out of stock")
+                return redirect(url_for("cart"))
+            item.book.quantity -= quantity
+            db.session.add(purchase)
+            db.session.delete(item)
     db.session.commit()
     flash("Purchase successful")
     return redirect(url_for("my_books"))
@@ -637,16 +663,26 @@ def checkout():
 @app.route("/my_books")
 @auth_required
 def my_books():
-    genres = Genre.query.all()
-    books = Book.query.all()
+
+    book_ids = (
+        Purchase.query.filter_by(user_id=session["user_id"])
+        .with_entities(Purchase.book_id)
+        .all()
+    )
+    book_ids = [book_id for (book_id,) in book_ids]
+
+    books = Book.query.filter(Book.id.in_(book_ids)).all()
+    genres = Genre.query.filter(Genre.books.any(Book.id.in_(book_ids))).all()
 
     parameter = request.args.get("parameter")
     query = request.args.get("query")
 
-    param_dict = {"genre": "Genre Name", "book": "Book Title", "price": "Max Price"}
+    param_dict = {"genre": "Genre Name", "book": "Book Title"}
 
     if parameter == "genre":
-        genres = Genre.query.filter(Genre.name.ilike(f"%{query}%")).all()
+        genres = Genre.query.filter(
+            Genre.books.any(Book.id.in_(book_ids)), Genre.name.ilike(f"%{query}%")
+        ).all()
     elif parameter == "book":
         return render_template(
             "my-books.html",

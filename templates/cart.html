@@ -6,6 +6,7 @@
     <h1 class="display-1">My Cart</h1>
 
     {% if cart|length > 0 %}
+    <form action="{{ url_for('checkout') }}" method="post">
     <table class="table">
         <thead>
             <tr>
@@ -23,12 +24,10 @@
                     <td><img src="{{ item.book.image }}" alt="{{ item.book.title }}" width="100"></td>
                     <td>{{ item.book.title }}</td>
                     <td>{{ item.book.price }}</td>
-                    <td><input class="form-control" type="number" id="quantity" name="quantity" min="1" max="{{ item.book.quantity }}" value="{{ item.quantity }}"></td>
-                    <td>{{ item.book.price * item.quantity }}</td>
+                    <td><input class="form-control" type="number" id="quantity_{{ item.id }}" name="quantity_{{ item.id }}" min="1" max="{{ item.book.quantity }}" value="{{ item.quantity }}" oninput="updateTotalPrice({{ item.id }}, {{ item.book.price }})"></td>
+                    <td id="totalPrice_{{ item.id }}">{{ (item.book.price * item.quantity)|round(2) }}</td>
                     <td>
-                        <form action="{{ url_for('delete_cart', cart_id=item.id) }}" method="post">
-                            <button type="submit" class="btn btn-danger"><i class="fa fa-trash" aria-hidden="true"></i> Remove</button>
-                        </form>
+                            <a type="button" href="{{ url_for('delete_cart', cart_id=item.id) }}" class="btn btn-danger"><i class="fa fa-trash" aria-hidden="true"></i> Remove</a>
                     </td>
                 </tr>
             {% endfor %}
@@ -36,14 +35,35 @@
         <tfoot>
             <tr>
                 <td colspan="4" text-align="center"><strong>Total</strong></td>
-                <td>{{ total }}</td>
+                <td id="cartTotal">{{ total|round(2) }}</td>
                 <td>
-                  <form action="{{ url_for('checkout') }}" method="post">
-                    <button type="submit" class="btn btn-success"><i class="fa fa-shopping-cart" aria-hidden="true"></i> Checkout</button>
-                  </form>
+                    <button type="submit" class="btn btn-success"><i class="fa fa-shopping-cart" aria-hidden="true" ></i> Checkout</button>
                 </td>
             </tr>
+        </tfoot>
     </table>
+    </form>
+
+    <script>
+        function updateTotalPrice(itemId, price) {
+            var quantity = parseFloat(document.getElementById('quantity_' + itemId).value);
+            var totalPrice = (quantity * price).toFixed(2);
+            document.getElementById('totalPrice_' + itemId).textContent = totalPrice;
+
+            // Recalculate the total sum
+            updateTotal();
+        }
+        
+        function updateTotal() {
+            var totalSum = 0;
+            {% for item in cart %}
+                var quantity = parseFloat(document.getElementById('quantity_{{ item.id }}').value);
+                var price = {{ item.book.price }};
+                totalSum += quantity * price;
+            {% endfor %}
+            document.getElementById('cartTotal').textContent = totalSum.toFixed(2);
+        }
+    </script>
     {% else %}
         <div class="alert alert-info" role="alert">
             <h5>Your cart is empty</h5>
@@ -51,3 +71,5 @@
     {% endif %}
 
 {% endblock %}
+
+
