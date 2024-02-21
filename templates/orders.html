@@ -1,0 +1,70 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <h1 class="display-1">Orders</h1>
+
+    <button class="btn btn-primary" onClick="window.print();">
+      <i class="fa fa-print"></i> 
+      Print
+    </button>
+
+    <a href="{{ url_for('export_csv') }}" class="btn btn-outline-success">
+      <i class="fa-solid fa-file-export"></i>
+      Export
+    </a>
+
+    <hr>
+
+    {% if transactions|length == 0 %}
+        <div class="alert alert-info">
+          <h2 class="display-2">No orders found.</h2>
+        </div>
+    {% else %}
+      {% for transaction in transactions %}
+        <div class="heading">
+          <h2 class="text-muted">Transaction #{{ transaction.id }}</h2>
+          <p class="datetime">Date: {{ transaction.date_paid.strftime("%d %b %Y, %I:%M %p") }}</p>
+        </div>
+        <div class="orders">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Book Title</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for purchase in transaction.purchase %}
+                <tr>
+                  <td>{{ purchase.book.title }}</td>
+                  <td>{{ purchase.quantity }}</td>
+                  <td>{{ purchase.book.price }}</td>
+                  <td>{{ purchase.quantity * purchase.book.price }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endfor %}
+    {% endif %}
+{% endblock %}
+
+{% block style %}
+
+<style>
+  .heading {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .datetime {
+    font-size: 1.0em;
+    color: #666;
+  }
+</style>
+
+{% endblock %}

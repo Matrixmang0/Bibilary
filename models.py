@@ -23,6 +23,9 @@ class User(db.Model):
     carts = db.relationship(
         "Cart", cascade="all, delete-orphan", backref="user", lazy=True
     )
+    transaction = db.relationship(
+        "Transaction", cascade="all, delete-orphan", backref="user", lazy=True
+    )
 
 
 class Librarian(db.Model):
@@ -82,13 +85,15 @@ class Borrow(db.Model):
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
     date_issued = db.Column(db.DateTime, nullable=False)
     date_due = db.Column(db.DateTime, nullable=False)
-    remaining_days = db.Column(db.Integer, nullable=False)
 
 
 class Purchase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
+    transaction_id = db.Column(
+        db.Integer, db.ForeignKey("transaction.id"), nullable=False
+    )
     date_purchased = db.Column(db.DateTime, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
 
@@ -98,6 +103,15 @@ class Cart(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
+
+
+class Transaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    date_paid = db.Column(db.DateTime, nullable=False)
+    purchase = db.relationship(
+        "Purchase", cascade="all, delete-orphan", backref="transaction", lazy=True
+    )
 
 
 with app.app_context():

@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  My Requests
+{% endblock %}
+
+{% block content %}
+  <h1 class="display-1">My Requests</h1>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Request ID</th>
+        <th>Book Title</th>
+        <th>Genre</th>
+        <th>Days Requested</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for request in requests %}
+        {% for book in books %}
+          {% if book.id==request.book_id %}
+            {% for genre in genres %}
+              {% if genre.id==book.genre_id %}
+                    <tr>
+                      <td>{{ request.id }}</td>
+                      <td>{{ book.title }}</td>
+                      <td>{{ genre.name }}</td>
+                      <td>{{ request.days_requested }}</td>
+                      <td>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                          <i class="fas fa-trash"></i> Revoke
+                        </button>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                          <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="staticBackdropLabel">Revoke {{ book.title }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                Are you sure want to revoke the request for {{ book.title }}?
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <a href="{{ url_for("revoke_request", request_id=request.id) }}" type="button" class="btn btn-danger" method="post">
+                                  <i class="fas fa-trash"></i>  Revoke
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+    
+{% endblock %}

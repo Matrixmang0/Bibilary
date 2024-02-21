@@ -1,0 +1,46 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+
+  User Statistics
+
+{% endblock %}
+
+{% block content %}
+
+  <h1 class="display-1">User Statistics</h1>
+
+  <div>
+    <canvas id="myChart"></canvas>
+  </div>
+
+{% endblock %}
+
+{% block script %}
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    const ctx = document.getElementById('myChart');
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: {{genre_names|safe}} ,
+        datasets: [{
+          label: '# of Books',
+          data: {{genre_counts|safe}},
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  </script>
+
+{% endblock %}

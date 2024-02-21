@@ -35,12 +35,24 @@
       {% if "user_id" in session %}
 
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        {% if session["user_id"] == 10000 %}
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.endpoint == 'user_stats' }}" href="{{ url_for('user_stats') }}"><i class="fa-solid fa-chart-simple"></i> User Stats</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.endpoint == 'user_requests' }}" href="{{ url_for('user_requests') }}"><i class="fa-solid fa-universal-access"></i>  Requests</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.endpoint == 'my_stats' }}" href="{{ url_for('my_stats') }}"><i class="fa-solid fa-chart-simple"></i> My Stats</a>
+        </li>
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.endpoint == 'my_books' }}" href="{{ url_for('my_books') }}"><i class="fa-solid fa-book-open"></i>  My Books</a>
         </li>
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.endpoint == 'cart' }}" href="{{ url_for('cart') }}"><i class="fa-solid fa-cart-shopping"></i> My Cart</a>
         </li>
+        {% endif %}
       </ul>
 
       {% endif %}
@@ -60,6 +72,10 @@
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
               {% if "user_id" in session %}
                 <li><a class="dropdown-item {{ 'active' if request.endpoint == 'profile' }}" href="{{ url_for('profile') }}">Profile</a></li>
+                {% if session["user_id"]!=10000 %}
+                  <li><a class="dropdown-item {{ 'active' if request.endpoint == 'orders' }}" href="{{ url_for('orders') }}">My Orders</a></li>
+                  <li><a class="dropdown-item {{ 'active' if request.endpoint == 'my_requests' }}" href="{{ url_for('my_requests', user_id=session["user_id"]) }}">Requests</a></li>
+                {% endif %}
                 <a class="btn btn-danger" href="{{ url_for('logout') }}">
                   Logout
                 </a>

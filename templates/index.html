@@ -22,8 +22,36 @@
                         <h5 class="card-title"><strong>{{ book.title }}</strong></h5>
                         <p class="card-text"><span class="text-muted">Price :</span>&nbsp;&nbsp;<span style="color:red;">&#8377;{{ book.price }}</span></p>
                         <div class="card-buttons">
-                          <a href="{{ url_for("add_to_cart", book_id=book.id) }}" method="post" class="btn btn-success">Add to cart</a>
-                          <a href="#" class="btn btn-primary">Borrow</a>
+                          {% if book.quantity > 0 %}
+                            <a href="{{ url_for("add_to_cart", book_id=book.id) }}" method="post" class="btn btn-success">Add to cart</a>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop{{book.id}}">Borrow</button>
+                            
+                            <!-- Modal -->
+                            <div class="modal fade" id="staticBackdrop{{book.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                              <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title" id="staticBackdropLabel">Day to Borrow</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                  </div>
+                                  <div class="modal-body">
+                                    Select the number of days you want to borrow the book {{ book.title }}.
+                                  </div>
+                                  <div class="modal-footer">
+                                    <form action="{{ url_for("add_to_request", book_id=book.id) }}" method="post">
+                                      <input type="number" class="form-control" name="days_requested" value="14" min="7" max="60">
+                                      <button type="submit" class="btn btn-primary" method="post">
+                                        Request
+                                      </button>
+                                    </form>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          
+                          {% else %}
+                            <button class="btn btn-outline-danger" disabled><i class="fa-solid fa-x"></i>  Out of stock</button>
+                          {% endif %}
                         </div>
                       </div>
                     </div>

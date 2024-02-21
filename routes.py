@@ -1,11 +1,23 @@
 import re
+import csv
 from io import BytesIO
 from datetime import datetime
 from flask import render_template, request, redirect, url_for, flash, session, send_file
 from email_validator import validate_email
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from models import User, Librarian, Genre, Book, Request, Borrow, Purchase, Cart, db
+from models import (
+    User,
+    Librarian,
+    Genre,
+    Book,
+    Request,
+    Borrow,
+    Purchase,
+    Cart,
+    Transaction,
+    db,
+)
 from app import app
 
 # --------------- Decorators ---------------
@@ -517,6 +529,50 @@ def delete_book(book_id, genre_id):
     return redirect(url_for("show_genre", id=genre_id))
 
 
+@app.route("/user_requests")
+@librarian_required
+def user_requests():
+    users = User.query.all()
+    requests = Request.query.all()
+    books = Book.query.all()
+    genres = Genre.query.all()
+    return render_template(
+        "requests.html", requests=requests, users=users, books=books, genres=genres
+    )
+
+
+@app.route("/accept_request/<int:request_id>", methods=["POST", "GET"])
+@librarian_required
+def accept_request(request_id):
+    request = Request.query.get(request_id)
+    if not request:
+        flash("Request not found")
+
+
+@app.route("/request/<int:request_id>/reject", methods=["POST", "GET"])
+@librarian_required
+def reject_request(request_id):
+    requested = Request.query.get(request_id)
+    if not requested:
+        flash("Request not found")
+        return redirect(url_for("my_requests", user_id=session["user_id"]))
+    db.session.delete(requested)
+    db.session.commit()
+    flash("Request rejected successfully")
+    return redirect(url_for("user_requests"))
+
+
+@app.route("/user_stats")
+@librarian_required
+def user_stats():
+    genres = Genre.query.all()
+    genre_names = [genre.name for genre in genres]
+    genre_counts = [len(genre.books) for genre in genres]
+    return render_template(
+        "user_stats.html", genre_names=genre_names, genre_counts=genre_counts
+    )
+
+
 # --------------- User routes --------------
 
 
@@ -619,8 +675,10 @@ def checkout():
     if not cart:
         flash("Cart is empty")
         return redirect(url_for("cart"))
-    purchase = Purchase(user_id=session["user_id"], date_purchased=datetime.now())
+    transaction = Transaction(user_id=session["user_id"], date_paid=datetime.now())
+    db.session.add(transaction)
     for item in cart:
+        purchase = Purchase(user_id=session["user_id"], date_purchased=datetime.now())
         quantity = int(request.form.get(f"quantity_{item.id}"))
         item_already_purchased = Purchase.query.filter_by(
             user_id=session["user_id"], book_id=item.book_id
@@ -653,6 +711,7 @@ def checkout():
                 flash("Book out of stock")
                 return redirect(url_for("cart"))
             item.book.quantity -= quantity
+            purchase.transaction_id = transaction.id
             db.session.add(purchase)
             db.session.delete(item)
     db.session.commit()
@@ -713,3 +772,87 @@ def my_books():
         query=query,
         show_search=True,
     )
+
+
+@app.route("/orders")
+@auth_required
+def orders():
+    transactions = (
+        Transaction.query.filter_by(user_id=session["user_id"])
+        .order_by(Transaction.date_paid.desc())
+        .all()
+    )
+    return render_template("orders.html", transactions=transactions)
+
+
+@app.route("/export_csv")
+@auth_required
+def export_csv():
+    transactions = Transaction.query.filter_by(user_id=session["user_id"]).all()
+    url = "static/csv/transactions.csv"
+    with open(url, "w") as f:
+        writer = csv.writer(f)
+        writer.writerow(
+            ["Transaction ID", "Date Paid", "Book Name", "Quantity", "Total Price"]
+        )
+        for transaction in transactions:
+            for purchase in transaction.purchase:
+                writer.writerow(
+                    [
+                        transaction.id,
+                        transaction.date_paid,
+                        purchase.book.title,
+                        purchase.quantity,
+                        purchase.book.price * purchase.quantity,
+                    ]
+                )
+        return redirect(url)
+
+
+@app.route("/my_stats")
+@auth_required
+def my_stats():
+    return render_template("my_stats.html")
+
+
+@app.route("/<int:user_id>/requests")
+@auth_required
+def my_requests(user_id):
+    requests = Request.query.filter_by(user_id=user_id).all()
+    books = Book.query.all()
+    genres = Genre.query.all()
+    return render_template(
+        "user-requests.html", requests=requests, books=books, genres=genres
+    )
+
+
+@app.route("/add_to_request/<int:book_id>", methods=["POST"])
+@auth_required
+def add_to_request(book_id):
+    book = Book.query.get(book_id)
+    if not book:
+        flash("Book not found")
+    date_requested = datetime.now()
+    days_requested = request.form.get("days_requested")
+    requested = Request(
+        user_id=session["user_id"],
+        book_id=book.id,
+        date_requested=date_requested,
+        days_requested=days_requested,
+    )
+    db.session.add(requested)
+    db.session.commit()
+    return redirect(url_for("my_requests", user_id=session["user_id"]))
+
+
+@app.route("/request/<int:request_id>/revoke", methods=["POST", "GET"])
+@auth_required
+def revoke_request(request_id):
+    requested = Request.query.get(request_id)
+    if not requested:
+        flash("Request not found")
+        return redirect(url_for("my_requests", user_id=session["user_id"]))
+    db.session.delete(requested)
+    db.session.commit()
+    flash("Request revoked successfully")
+    return redirect(url_for("my_requests", user_id=session["user_id"]))
