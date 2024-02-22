@@ -10,8 +10,14 @@
 
   <h1 class="display-1">Usage Statistics</h1>
 
+  <h2 class="display-4">Books Purchased</h2>
   <div>
-    <canvas id="myChart"></canvas>
+    <canvas id="myChart1"></canvas>
+  </div>
+
+  <h2 class="display-4">Books Borrowed</h2>
+  <div>
+    <canvas id="myChart2"></canvas>
   </div>
 
 {% endblock %}
@@ -21,15 +27,15 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
-    const ctx = document.getElementById('myChart');
+    const ctx = document.getElementById('myChart1');
 
     new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        labels: {{genre_names1|safe}} ,
         datasets: [{
-          label: '# of Votes',
-          data: [12, 19, 3, 5, 2, 3],
+          label: '# of Books Purchased',
+          data: {{genre_counts1|safe}},
           borderWidth: 1
         }]
       },
@@ -40,7 +46,28 @@
           }
         }
       }
-    });
+    }); 
+
+    const ctz = document.getElementById('myChart2');
+
+    new Chart(ctz, {
+      type: 'polarArea',
+      data: {
+        labels: {{genre_names2|safe}} ,
+        datasets: [{
+          label: '# of Books Borrowed',
+          data: {{genre_counts2|safe}},
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    }); 
   </script>
 
 {% endblock %}

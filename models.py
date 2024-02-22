@@ -40,7 +40,6 @@ class Genre(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
     date_created = db.Column(db.DateTime, nullable=False)
-    image = db.Column(db.LargeBinary, nullable=True)
     description = db.Column(db.String, nullable=False)
     books = db.relationship(
         "Book", cascade="all, delete-orphan", backref="genre", lazy=True

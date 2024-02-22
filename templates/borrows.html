@@ -1,64 +1,63 @@
 {% extends "layout.html" %}
 
 {% block title %}
-  Requests
+  Borrows
 {% endblock %}
 
 {% block content %}
-  <h1 class="display-1">Requests</h1>
+  <h1 class="display-1">Borrows</h1>
 
-  {% if requests %}
+  {% if borrows %}
 
     {% for user in users %}
 
-      {% if user.requests %}
+      {% if user.borrows %}
 
         <h3 class="display-3">{{user.name}}</h3>
 
         <table class="table table-striped">
           <thead>
             <tr>
-              <th>Request ID</th>
+              <th>Borrow ID</th>
               <th>Book Title</th>
               <th>Genre</th>
-              <th>Days Requested</th>
+              <th>Date Due</th>
+              <th>Remaining days</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {% for request in requests %}
-              {% if request in user.requests %}
+            {% for borrow in borrows %}
+              {% if borrow in user.borrows %}
                 {% for book in books %}
-                  {% if book.id==request.book_id %}
+                  {% if book.id==borrow.book_id %}
                     {% for genre in genres %}
                       {% if genre.id==book.genre_id %}
                             <tr>
-                              <td>{{ request.id }}</td>
+                              <td>{{ borrow.id }}</td>
                               <td>{{ book.title }}</td>
                               <td>{{ genre.name }}</td>
-                              <td>{{ request.days_requested }}</td>
+                              <td>{{ borrow.date_due.strftime("%d %b %Y, %I:%M %p") }}</td>
+                              <td>{{ (borrow.date_due - today).days }}</td>
                               <td>
-                                <a href="{{  url_for("accept_request", request_id=request.id, user_id=user.id) }}"  type="button" class="btn btn-success" >
-                                  <i class="fa-solid fa-check"></i> Accept
-                                </a>
-                                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop{{request.id}}">
-                                  <i class="fa-solid fa-x"></i> Reject
+                                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop{{borrow.id}}">
+                                  <i class="fa-solid fa-x"></i> Revoke
                                 </button>
 
-                                <div class="modal fade" id="staticBackdrop{{request.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                <div class="modal fade" id="staticBackdrop{{borrow.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                   <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content">
                                       <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">Reject Request</h5>
+                                        <h5 class="modal-title" id="staticBackdropLabel">Revoke Borrowed Book</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                       </div>
                                       <div class="modal-body">
-                                        Are you sure want to reject the request ID {{request.id}}?
+                                        Are you sure want to revoke the borrow ID {{borrow.id}}?
                                       </div>
                                       <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                        <a href="{{ url_for("reject_request", request_id=request.id) }}" type="button" class="btn btn-danger" method="post">
-                                          <i class="fa-solid fa-x"></i>  Reject
+                                        <a href="{{ url_for("revoke_borrow", borrow_id=borrow.id) }}" type="button" class="btn btn-danger" method="post">
+                                          <i class="fa-solid fa-x"></i>  Revoke
                                         </a>
                                       </div>
                                     </div>
@@ -80,9 +79,7 @@
 
   {% else %}
 
-    <div class="alert alert-info" role="alert">
-            <h5> There are no active requests </h5>
-    </div>
+    <h5 class="display-5 text-muted">No requests found</h5>
     
   {% endif %}
     

@@ -1,0 +1,78 @@
+{% extends 'layout.html' %}
+
+{% block title %}My Borrows{% endblock %}
+
+{% block content %}
+
+  <h1 class="display-1">My Borrows</h1>
+
+  {% if borrows %}  
+    <div class="showcase-books">
+      {% for genre in genres %}
+        <div class="genres">
+          <h2>{{genre.name}}</h2>
+          <hr>
+          <div class="books">
+            {% for borrow in borrows %}
+                  {% for book in genre.books %}
+                      {% if book in books %}
+                        {% if book.id==borrow.book_id %}
+                          {% if (parameter=="book" and query.lower() in book.title.lower()) or (parameter == "price" and query >= book.price) or (parameter=="genre") or (not parameter) %}
+                              <div class="card" style="width: 14rem;">
+                                <img src="https://picsum.photos/1000/1000" class="card-img-top" alt="...">
+                                <div class="card-body">
+                                  <h5 class="card-title"><strong>{{ book.title }}</strong></h5>
+                                  <p class="card-text"><span class="text-muted">Remaining Days :</span>&nbsp;&nbsp;<span style="color:red;">{{ (borrow.date_due-today).days }}</span></p>
+                                  <div class="card-buttons">
+                                    <a href="{{ url_for("return_borrow", borrow_id=borrow.id) }}" method="post" class="btn btn-warning">Return</a>
+                                  </div>
+                                </div>
+                              </div>
+                          {% endif %}
+                        {% endif %}
+                      {% endif %}
+                  {% endfor %}
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info" role="alert">
+            <h5>You have not borrowed any books yet</h5>
+    </div>
+  {% endif %}
+{% endblock %}
+
+
+
+{% block style %}
+<style>
+
+  .showcase-books {
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+  }
+
+  .genres {
+    margin: 20px 0 20px 0;
+  }
+
+  .books {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+  }
+
+  .card {
+    margin: 10px;
+  }
+
+  .card-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+</style>
+{% endblock %}

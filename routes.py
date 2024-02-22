@@ -1,7 +1,7 @@
 import re
 import csv
 from io import BytesIO
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import render_template, request, redirect, url_for, flash, session, send_file
 from email_validator import validate_email
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -289,7 +289,6 @@ def add_genre():
 def add_genre_post():
     name = request.form.get("name")
     description = request.form.get("description")
-    image = request.files["image"]
 
     if not name or not description:
         flash("Please fill all the required fields")
@@ -299,12 +298,7 @@ def add_genre_post():
         flash("Genre already exists")
         return redirect(url_for("add_genre"))
 
-    new_genre = Genre(
-        name=name,
-        date_created=datetime.now(),
-        description=description,
-        image=image.read() if image else None,
-    )
+    new_genre = Genre(name=name, date_created=datetime.now(), description=description)
     db.session.add(new_genre)
     db.session.commit()
 
@@ -337,7 +331,6 @@ def edit_genre(id):
 def edit_genre_post(id):
     name = request.form.get("name")
     description = request.form.get("description")
-    image = request.files["image"]
 
     if not name or not description:
         flash("Please fill all the required fields")
@@ -354,7 +347,6 @@ def edit_genre_post(id):
 
     genre.name = name
     genre.description = description
-    genre.image = image.read() if image else genre.image
 
     db.session.commit()
     flash("Genre updated successfully")
@@ -541,12 +533,35 @@ def user_requests():
     )
 
 
-@app.route("/accept_request/<int:request_id>", methods=["POST", "GET"])
+@app.route(
+    "/user/<int:user_id>/accept_request/<int:request_id>", methods=["POST", "GET"]
+)
 @librarian_required
-def accept_request(request_id):
+def accept_request(user_id, request_id):
     request = Request.query.get(request_id)
+    user = User.query.get(user_id)
+    book = Book.query.get(request.book_id)
     if not request:
         flash("Request not found")
+        return redirect(url_for("user_requests"))
+    if not user:
+        flash("User not found")
+        return redirect(url_for("user_requests"))
+    days_requested = request.days_requested
+    date_issued = datetime.now()
+    date_due = date_issued + timedelta(days=days_requested)
+    borrow = Borrow(
+        user_id=user_id,
+        book_id=request.book_id,
+        date_issued=date_issued,
+        date_due=date_due,
+    )
+    book.quantity -= 1
+    db.session.add(borrow)
+    db.session.delete(request)
+    db.session.commit()
+    flash("Request accepted successfully")
+    return redirect(url_for("user_requests"))
 
 
 @app.route("/request/<int:request_id>/reject", methods=["POST", "GET"])
@@ -562,14 +577,81 @@ def reject_request(request_id):
     return redirect(url_for("user_requests"))
 
 
+@app.route("/borrowed_books")
+@librarian_required
+def user_borrows():
+    borrows = Borrow.query.all()
+    users = User.query.all()
+    books = Book.query.all()
+    genres = Genre.query.all()
+    today = datetime.now()
+
+    for borrow in borrows:
+        if borrow.date_due < today:
+            db.session.delete(borrow)
+            book = Book.query.get(borrow.book_id)
+            book.quantity += 1
+            db.session.commit()
+
+    return render_template(
+        "borrows.html",
+        borrows=borrows,
+        users=users,
+        books=books,
+        genres=genres,
+        today=today,
+    )
+
+
+@app.route("/borrow/<int:borrow_id>/revoke", methods=["POST", "GET"])
+@librarian_required
+def revoke_borrow(borrow_id):
+    borrow = Borrow.query.get(borrow_id)
+    if not borrow:
+        flash("Borrow not found")
+        return redirect(url_for("user_borrows"))
+    book = Book.query.get(borrow.book_id)
+    book.quantity += 1
+    db.session.delete(borrow)
+    db.session.commit()
+    return redirect(url_for("user_borrows"))
+
+
 @app.route("/user_stats")
 @librarian_required
 def user_stats():
     genres = Genre.query.all()
-    genre_names = [genre.name for genre in genres]
-    genre_counts = [len(genre.books) for genre in genres]
+    genre_names1 = [genre.name for genre in genres]
+    genre_counts1 = [len(genre.books) for genre in genres]
+
+    purchases = Purchase.query.all()
+    genre2 = {}
+    for purchase in purchases:
+        if purchase.book.genre.name in genre2:
+            genre2[purchase.book.genre.name] += 1
+        else:
+            genre2[purchase.book.genre.name] = 1
+    genre_names2 = list(genre2.keys())
+    genre_counts2 = list(genre2.values())
+
+    borrows = Borrow.query.all()
+    genre3 = {}
+    for borrow in borrows:
+        if borrow.book.genre.name in genre3:
+            genre3[borrow.book.genre.name] += 1
+        else:
+            genre3[borrow.book.genre.name] = 1
+    genre_names3 = list(genre3.keys())
+    genre_counts3 = list(genre3.values())
+
     return render_template(
-        "user_stats.html", genre_names=genre_names, genre_counts=genre_counts
+        "user_stats.html",
+        genre_names1=genre_names1,
+        genre_counts1=genre_counts1,
+        genre_names2=genre_names2,
+        genre_counts2=genre_counts2,
+        genre_names3=genre_names3,
+        genre_counts3=genre_counts3,
     )
 
 
@@ -752,16 +834,6 @@ def my_books():
             param_dict=param_dict,
             show_search=True,
         )
-    elif parameter == "price":
-        return render_template(
-            "my-books.html",
-            genres=genres,
-            books=books,
-            parameter=parameter,
-            query=float(query),
-            param_dict=param_dict,
-            show_search=True,
-        )
 
     return render_template(
         "my-books.html",
@@ -809,10 +881,40 @@ def export_csv():
         return redirect(url)
 
 
-@app.route("/my_stats")
+@app.route("/<int:user_id>/my_stats")
 @auth_required
-def my_stats():
-    return render_template("my_stats.html")
+def my_stats(user_id):
+    purchases = Purchase.query.filter_by(user_id=user_id).all()
+    book_ids = [purchase.book_id for purchase in purchases]
+    genres = Genre.query.filter(Genre.books.any(Book.id.in_(book_ids))).all()
+    genre_names1 = [genre.name for genre in genres]
+    genre_counts1 = []
+    for genre in genres:
+        count = 0
+        for purchase in purchases:
+            if purchase.book.genre_id == genre.id:
+                count += 1
+        genre_counts1.append(count)
+
+    borrows = Borrow.query.filter_by(user_id=user_id).all()
+    book_ids = [borrow.book_id for borrow in borrows]
+    genres = Genre.query.filter(Genre.books.any(Book.id.in_(book_ids))).all()
+    genre_names2 = [genre.name for genre in genres]
+    genre_counts2 = []
+    for genre in genres:
+        count = 0
+        for borrow in borrows:
+            if borrow.book.genre_id == genre.id:
+                count += 1
+        genre_counts2.append(count)
+
+    return render_template(
+        "my_stats.html",
+        genre_names1=genre_names1,
+        genre_counts1=genre_counts1,
+        genre_names2=genre_names2,
+        genre_counts2=genre_counts2,
+    )
 
 
 @app.route("/<int:user_id>/requests")
@@ -856,3 +958,77 @@ def revoke_request(request_id):
     db.session.commit()
     flash("Request revoked successfully")
     return redirect(url_for("my_requests", user_id=session["user_id"]))
+
+
+@app.route("/my_borrows")
+@auth_required
+def my_borrows():
+    borrows = Borrow.query.filter_by(user_id=session["user_id"]).all()
+    books = Book.query.all()
+    today = datetime.now()
+
+    for borrow in borrows:
+        if borrow.date_due < today:
+            db.session.delete(borrow)
+            book = Book.query.get(borrow.book_id)
+            book.quantity += 1
+            db.session.commit()
+            return redirect(url_for("my_borrows"))
+
+    book_ids = (
+        Borrow.query.filter_by(user_id=session["user_id"])
+        .with_entities(Borrow.book_id)
+        .all()
+    )
+    book_ids = [book_id for (book_id,) in book_ids]
+
+    books = Book.query.filter(Book.id.in_(book_ids)).all()
+    genres = Genre.query.filter(Genre.books.any(Book.id.in_(book_ids))).all()
+
+    parameter = request.args.get("parameter")
+    query = request.args.get("query")
+
+    param_dict = {"genre": "Genre Name", "book": "Book Title"}
+
+    if parameter == "genre":
+        genres = Genre.query.filter(
+            Genre.books.any(Book.id.in_(book_ids)), Genre.name.ilike(f"%{query}%")
+        ).all()
+    elif parameter == "book":
+        return render_template(
+            "user-borrows.html",
+            genres=genres,
+            books=books,
+            borrows=borrows,
+            parameter=parameter,
+            query=query,
+            param_dict=param_dict,
+            today=today,
+            show_search=True,
+        )
+
+    return render_template(
+        "user-borrows.html",
+        genres=genres,
+        books=books,
+        borrows=borrows,
+        param_dict=param_dict,
+        parameter=parameter,
+        query=query,
+        today=today,
+        show_search=True,
+    )
+
+
+@app.route("/borrow/<int:borrow_id>/return", methods=["POST", "GET"])
+@auth_required
+def return_borrow(borrow_id):
+    borrow = Borrow.query.get(borrow_id)
+    if not borrow:
+        flash("Borrow not found")
+    book = Book.query.get(borrow.book_id)
+    book.quantity += 1
+    db.session.delete(borrow)
+    db.session.commit()
+    flash(f"Book {book.title} returned successfully")
+    return redirect(url_for("my_borrows"))
