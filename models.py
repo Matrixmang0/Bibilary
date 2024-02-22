@@ -54,8 +54,8 @@ class Book(db.Model):
     price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     summary = db.Column(db.String, nullable=False)
-    image = db.Column(db.LargeBinary, nullable=True)
-    content = db.Column(db.LargeBinary, nullable=False)
+    image = db.Column(db.String, nullable=True)
+    content = db.Column(db.String, nullable=False)
     requests = db.relationship(
         "Request", cascade="all, delete-orphan", backref="book", lazy=True
     )

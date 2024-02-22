@@ -11,3 +11,4 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = os.getenv(
     "SQLALCHEMY_TRACK_MODIFICATIONS"
 )
 app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER")
+app.config["ALLOWED_EXTENSIONS"] = os.getenv("ALLOWED_EXTENSIONS")

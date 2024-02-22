@@ -1,10 +1,11 @@
-import re
+import re, os
 import csv
 from io import BytesIO
 from datetime import datetime, timedelta
 from flask import render_template, request, redirect, url_for, flash, session, send_file
 from email_validator import validate_email
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from functools import wraps
 from models import (
     User,
@@ -377,6 +378,13 @@ def add_book(genre_id):
     return render_template("book/add.html", genre=genre, genres=genres)
 
 
+def allowed_file(filename):
+    return (
+        "." in filename
+        and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
+    )
+
+
 @app.route("/<int:genre_id>/book/add", methods=["POST"])
 @librarian_required
 def add_book_post(genre_id):
@@ -396,8 +404,6 @@ def add_book_post(genre_id):
         or not quantity
         or not price
         or not summary
-        or not image
-        or not content
     ):
         flash("Please fill all the required fields")
         return redirect(url_for("add_book", genre_id=genre_id))
@@ -426,6 +432,24 @@ def add_book_post(genre_id):
         flash("Price should be a positive float")
         return redirect(url_for("add_book", genre_id=genre_id))
 
+    if image.filename == "":
+        flash("Image not been selected")
+        return redirect(url_for("add_book", genre_id=genre_id))
+    image.filename = title + "." + image.filename.rsplit(".", 1)[1]
+    if image and allowed_file(image.filename):
+        filename = secure_filename(image.filename)
+        image_path = os.path.join(app.config["UPLOAD_FOLDER"], "front-cover", filename)
+        image.save(image_path)
+
+    if content.filename == "":
+        flash("Content not been selected")
+        return redirect(url_for("add_book", genre_id=genre_id))
+    content.filename = title + "." + content.filename.rsplit(".", 1)[1]
+    if content and allowed_file(content.filename):
+        filename = secure_filename(content.filename)
+        content_path = os.path.join(app.config["UPLOAD_FOLDER"], "content", filename)
+        content.save(content_path)
+
     book = Book(
         title=title,
         authors=authors,
@@ -433,8 +457,8 @@ def add_book_post(genre_id):
         quantity=quantity,
         price=price,
         summary=summary,
-        image=image.read(),
-        content=content.read(),
+        image=image_path,
+        content=content_path,
     )
 
     db.session.add(book)
