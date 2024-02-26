@@ -977,6 +977,14 @@ def add_to_request(book_id):
     book = Book.query.get(book_id)
     if not book:
         flash("Book not found")
+
+    Borrows = Borrow.query.filter_by(user_id=session["user_id"]).all()
+    Requests = Request.query.filter_by(user_id=session["user_id"]).all()
+
+    if len(Borrows) + len(Requests) >= 5:
+        flash("You can only borrow 5 books at a time")
+        return redirect(url_for("my_books"))
+
     date_requested = datetime.now()
     days_requested = request.form.get("days_requested")
     requested = Request(
