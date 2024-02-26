@@ -983,7 +983,21 @@ def add_to_request(book_id):
 
     if len(Borrows) + len(Requests) >= 5:
         flash("You can only borrow 5 books at a time")
-        return redirect(url_for("my_books"))
+        return redirect(url_for("my_requests", user_id=session["user_id"]))
+
+    Borrows = Borrow.query.filter_by(
+        user_id=session["user_id"], book_id=book_id
+    ).first()
+    Requests = Request.query.filter_by(
+        user_id=session["user_id"], book_id=book_id
+    ).first()
+
+    if Borrows:
+        flash("You have already borrowed this book")
+        return redirect(url_for("my_requests", user_id=session["user_id"]))
+    if Requests:
+        flash("You have already requested this book")
+        return redirect(url_for("my_requests", user_id=session["user_id"]))
 
     date_requested = datetime.now()
     days_requested = request.form.get("days_requested")
