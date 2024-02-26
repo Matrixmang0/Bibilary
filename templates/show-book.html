@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+{{book.title}}
+{% endblock %}
+
+{% block content %} 
+        <div class="text-center">
+          <object data="{{"../../"+book.content[1::]}}" width="100%"  height="873"></object>
+        </div>
+{% endblock %}

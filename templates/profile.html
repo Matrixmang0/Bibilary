@@ -6,70 +6,67 @@
 
 {% set user = librarian if user is none else user %}
 
-<div class="heading">
-  <h1 class="display-1">
-    Welcome
-    <span class="text-muted">
-      {{user.name}}
-     </span>
-  </h1>
-  
-  <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed={{ session["user_id"] }}" class="profile-image" alt="Profile Image" class="img-fluid" />
+<div class="container mt-5">
+
+      <div class="align-items-center mb-4 text-center">
+        <h1 class="display-3 me-3">
+          Welcome
+          <span class="text-muted">{{user.name}}</span>
+        </h1>
+        <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed={{ session["user_id"] }}" class="profile-image" alt="Profile Image" />
+      </div>
+
+      <div class="alert alert-info" role="alert">
+        <strong>Info:</strong> You can update your profile here
+      </div>
+
+      <!-- Form to update Profile -->
+      <form action="" method="post" class="form p-4 border rounded">
+        <div class="mb-3">
+          <label for="name" class="form-label">Name</label>
+          <input type="text" name="name" class="form-control" value="{{user.name}}" required />
+        </div>
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" name="username" class="form-control" value="{{user.username}}" required />
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" value="{{user.email}}" required />
+        </div>
+        <div class="d-flex flex-column gap-3">
+          <a class="btn btn-warning" href="{{ url_for('change_password') }}" role="button">Change Password</a>
+          <button type="submit" class="btn btn-info">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
-
-<div class="alert alert-info" role="alert">
-  <strong>Info:</strong> You can update your profile <here class=""></here>
-</div>
-
-<!-- Form to update Profile -->
-
-<form action="" method="post" class="form">
-  <div class="form-group">
-    <label for="name" class="form-label">Name</label>
-    <input type="text" name="name" class="form-control" value="{{user.name}}" required />
-  </div>
-  <div class="form-group">
-    <label for="username" class="form-label">Username</label>
-    <input type="text" name="username" class="form-control" value="{{user.username}}" required />
-  </div>
-  <div class="form-group">
-    <label for="email" class="form-label">Email</label>
-    <input type="email" name="email" class="form-control" value="{{user.email}}" required />
-  </div>
-  <div class="buttons">
-    <a class="btn btn-warning" href="{{ url_for("change_password") }}" role="button">Change Password</a>
-    <button type="submit" class="btn btn-info">Save</button>
-  </div>
-</form>
 
 {% endblock %}
 
 {% block style %}
 
 <style>
-  .heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
   .profile-image {
     width: 120px;
     height: 120px;
     border-radius: 50%;
     border: 2px solid #000;
-    margin: 30px 30px 30px 20px;
+    margin-left: 20px;
   }
 
-  .buttons {
-    display: flex;
-    flex-direction: column;
-    row-gap: 20px;
-    margin : 20px 0;
-    align-items: center;
+  .alert-info {
+    margin-top: 20px;
   }
 
+  .form {
+    background-color: #f8f9fa; /* Light gray background */
+  }
 
-  </style>
+  .container {
+    max-width: 600px;
+  }
+</style>
 
 {% endblock %}

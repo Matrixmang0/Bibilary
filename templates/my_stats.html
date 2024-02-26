@@ -7,17 +7,21 @@
 {% endblock %}
 
 {% block content %}
+  <h1 class="display-3 text-center">Usage Statistics</h1>
 
-  <h1 class="display-1">Usage Statistics</h1>
-
-  <h2 class="display-4">Books Purchased</h2>
-  <div>
-    <canvas id="myChart1"></canvas>
-  </div>
-
-  <h2 class="display-4">Books Borrowed</h2>
-  <div>
-    <canvas id="myChart2"></canvas>
+  <div class="flex-container">
+    <div class="graph">
+      <h2 class="display-5 text-center text-muted">Books Purchased</h2>
+      <div>
+        <canvas id="myChart1"></canvas>
+      </div>
+    </div>
+    <div class="graph">
+      <h2 class="display-5 text-center text-muted">Books Borrowed</h2>
+      <div>
+        <canvas id="myChart2"></canvas>
+      </div>
+    </div>
   </div>
 
 {% endblock %}
@@ -27,16 +31,23 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
-    const ctx = document.getElementById('myChart1');
 
+    function getRandomColor(alpha) {
+      const random255 = () => Math.floor(Math.random() * 256);
+      return `rgba(${random255()}, ${random255()}, ${random255()}, ${alpha})`;
+    }
+
+    // Chart 1
+    const ctx = document.getElementById('myChart1');
     new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: {{genre_names1|safe}} ,
+        labels: {{genre_names1|safe}},
         datasets: [{
-          label: '# of Books Purchased',
+          label: 'Mystery/Thriller',
           data: {{genre_counts1|safe}},
-          borderWidth: 1
+          borderWidth: 1,
+          backgroundColor: Array.from({ length: {{genre_names1|length}} }, () => getRandomColor(0.5))
         }]
       },
       options: {
@@ -46,18 +57,18 @@
           }
         }
       }
-    }); 
+    });
 
+    // Chart 2
     const ctz = document.getElementById('myChart2');
-
     new Chart(ctz, {
       type: 'polarArea',
       data: {
-        labels: {{genre_names2|safe}} ,
+        labels: {{genre_names2|safe}},
         datasets: [{
-          label: '# of Books Borrowed',
           data: {{genre_counts2|safe}},
-          borderWidth: 1
+          borderWidth: 1,
+          backgroundColor: Array.from({ length: {{genre_names2|length}} }, () => getRandomColor(0.5))
         }]
       },
       options: {
@@ -67,7 +78,44 @@
           }
         }
       }
-    }); 
+    });
+
+
   </script>
 
+{% endblock %}
+
+
+{% block style %}
+
+<style>
+
+  .flex-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 50px;
+  }
+
+  .graph {
+    width: 45%;
+    padding: 20px;
+    border: 1px solid #000;
+    border-radius: 10px;
+  }
+
+  canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  h2 {
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    margin-top: 10px;
+  }
+
+</style> 
 {% endblock %}

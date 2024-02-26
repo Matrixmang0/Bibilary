@@ -1,5 +1,4 @@
 <!-- prettier-ignore -->
-
 {% extends 'layout.html' %}
 
 {% block title %}
@@ -7,34 +6,42 @@
 {% endblock %}
 
 {% block content %}
-  <h1 class="display-1 text-center"><b>Login</b></h1>
+  <div class="container mt-5">
+    <h1 class="display-1 text-center"><b>Login</b></h1>
 
-  <div class="card text-dark bg-light mb-3" style="width: 26rem; height: 27rem">
-    <div class="container">
+    <div class="card bg-light shadow-lg p-4 rounded w-50 mx-auto">
       <form method="post">
         <div class="mb-3">
           <label for="username-email" class="form-label">Username / Email address</label>
           <input type="text" name="username-email" class="form-control" id="InputEmail" aria-describedby="emailHelp">
-          <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+          <div id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</div>
         </div>
         <div class="mb-3">
           <label for="password" class="form-label">Password</label>
           <input type="password" name="password" class="form-control" id="exampleInputPassword1">
         </div>
-        <br>
-        <div class="mb-3">
-        <p class="text-center"><button type="submit" class="btn btn-success btn-lg">Login</button></p>
+        <div class="mb-3 text-center">
+          <button type="submit" class="btn btn-success btn-lg">Login</button>
         </div>
       </form>
-      <br>
+
       <p class="text-center">Don't have an account? <a href="{{ url_for('register') }}">Register</a></p>
     </div>
   </div>
 
   <style>
+    body {
+      background-color: #f8f9fa; /* Light gray background */
+    }
+
     .container {
-      width: 400px;
+      width: 900px;
       margin-top: 63px;
+    }
+
+    .card {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
   </style>
 {% endblock %}
+

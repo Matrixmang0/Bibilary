@@ -5,85 +5,88 @@
 {% endblock %}
 
 {% block content %}
-  <h1 class="display-1">Requests</h1>
+  <div class="container mt-5">
+    <h1 class="display-3 text-center">Requests</h1>
+    <br>
+    {% if requests %}
 
-  {% if requests %}
+      {% for user in users %}
 
-    {% for user in users %}
+        {% if user.requests %}
 
-      {% if user.requests %}
+          <h3 class="display-4 text-muted">{{user.name}}</h3>
 
-        <h3 class="display-3">{{user.name}}</h3>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Request ID</th>
+                <th>Book Title</th>
+                <th>Genre</th>
+                <th>Days Requested</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for request in requests %}
+                {% if request in user.requests %}
+                  {% for book in books %}
+                    {% if book.id==request.book_id %}
+                      {% for genre in genres %}
+                        {% if genre.id==book.genre_id %}
+                          <tr>
+                            <td>{{ request.id }}</td>
+                            <td>{{ book.title }}</td>
+                            <td>{{ genre.name }}</td>
+                            <td>{{ request.days_requested }}</td>
+                            <td>
+                              <a href="{{  url_for("accept_request", request_id=request.id, user_id=user.id) }}"  type="button" class="btn btn-success">
+                                <i class="fas fa-check"></i> Accept
+                              </a>
+                              <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop{{request.id}}">
+                                <i class="fas fa-times"></i> Reject
+                              </button>
 
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Request ID</th>
-              <th>Book Title</th>
-              <th>Genre</th>
-              <th>Days Requested</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for request in requests %}
-              {% if request in user.requests %}
-                {% for book in books %}
-                  {% if book.id==request.book_id %}
-                    {% for genre in genres %}
-                      {% if genre.id==book.genre_id %}
-                            <tr>
-                              <td>{{ request.id }}</td>
-                              <td>{{ book.title }}</td>
-                              <td>{{ genre.name }}</td>
-                              <td>{{ request.days_requested }}</td>
-                              <td>
-                                <a href="{{  url_for("accept_request", request_id=request.id, user_id=user.id) }}"  type="button" class="btn btn-success" >
-                                  <i class="fa-solid fa-check"></i> Accept
-                                </a>
-                                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop{{request.id}}">
-                                  <i class="fa-solid fa-x"></i> Reject
-                                </button>
-
-                                <div class="modal fade" id="staticBackdrop{{request.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                  <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                      <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">Reject Request</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                      </div>
-                                      <div class="modal-body">
-                                        Are you sure want to reject the request ID {{request.id}}?
-                                      </div>
-                                      <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                        <a href="{{ url_for("reject_request", request_id=request.id) }}" type="button" class="btn btn-danger" method="post">
-                                          <i class="fa-solid fa-x"></i>  Reject
-                                        </a>
-                                      </div>
+                              <div class="modal fade" id="staticBackdrop{{request.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                  <div class="modal-content">
+                                    <div class="modal-header">
+                                      <h5 class="modal-title" id="staticBackdropLabel">Reject Request</h5>
+                                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                      Are you sure you want to reject the request ID {{request.id}}?
+                                    </div>
+                                    <div class="modal-footer">
+                                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                      <a href="{{ url_for("reject_request", request_id=request.id) }}" type="button" class="btn btn-danger" method="post">
+                                        <i class="fas fa-times"></i> Reject
+                                      </a>
                                     </div>
                                   </div>
                                 </div>
-                              </td>
-                            </tr>
-                      {% endif %}
-                    {% endfor %}
-                  {% endif %}
-                {% endfor %}
-              {% endif %}
-            {% endfor %}
-          </tbody>
-        </table>
+                              </div>
+                            </td>
+                          </tr>
+                        {% endif %}
+                      {% endfor %}
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <br>
         {% endif %}
-      
-    {% endfor %}
 
-  {% else %}
+      {% endfor %}
 
-    <div class="alert alert-info" role="alert">
-            <h5> There are no active requests </h5>
-    </div>
-    
-  {% endif %}
-    
+    {% else %}
+
+      <div class="alert alert-info" role="alert">
+        <h5>There are no active requests</h5>
+      </div>
+
+    {% endif %}
+  </div>
 {% endblock %}

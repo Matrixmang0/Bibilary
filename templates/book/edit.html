@@ -5,50 +5,85 @@
 {% endblock %}
 
 {% block content %}
-  <h1 class="display-1"> Edit Book {{ book.title }} </h1>
+  <div class="container mt-5">
+    <h1 class="display-3 mb-4 text-center">Edit Book </h1>
 
-  <form action="" method="post" class="form" enctype="multipart/form-data">
-    <div class="form-group">
-      <label for="title" class="form-label">Book Title</label>
-      <input type="text" class="form-control" id="title" name="title" value="{{ book.title }}" required>
+    <h2 class="display-5 mb-4 text-center text-muted">{{ book.title }}</h2>
+    <br>
+    <form action="" method="post" class="row g-3">
+      <div class="col-md-6">
+        <div class="mb-4">
+          <label for="title" class="form-label"><strong class="text-muted">Book Title</strong></label>
+          <input type="text" class="form-control" id="title" name="title" value="{{ book.title }}" required>
+        </div>
 
-      <label for="authors" class="form-label">Authors</label>
-      <input type="text" class="form-control" id="authors" name="authors" value="{{ book.authors }}" required>
+        <div class="mb-4">
+          <label for="authors" class="form-label"><strong class="text-muted">Authors</strong></label>
+          <input type="text" class="form-control" id="authors" name="authors" value="{{ book.authors }}" required>
+        </div>
 
-      <label for="genre_id" class="form-label">Genre</label>
-      <select class="form-select" id="genre_id" name="genre_id" required>
-        <option value="">Select Genre</option>
-        {% for gen in genres %}
-        {% if genre.id == gen.id %}
-          <option selected value="{{ gen.id }}">{{ gen.name }}</option>
-        {% else %}
-          <option value="{{ gen.id }}">{{ gen.name }}</option>
-        {% endif %}
-        {% endfor %}
-      </select>
+        <div class="mb-4">
+          <label for="genre_id" class="form-label"><strong class="text-muted">Genre</strong></label>
+          <select class="form-select" id="genre_id" name="genre_id" required>
+            <option value="">Select Genre</option>
+            {% for gen in genres %}
+              {% if genre.id == gen.id %}
+                <option selected value="{{ gen.id }}">{{ gen.name }}</option>
+              {% else %}
+                <option value="{{ gen.id }}">{{ gen.name }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
 
-      <label for="quantity" class="form-label">Quantity</label>
-      <input type="number" class="form-control" id="quantity" min="1" name="quantity" value="{{ book.quantity }}" required>
+        <div class="mb-4">
+          <label for="quantity" class="form-label"><strong class="text-muted">Quantity</strong></label>
+          <input type="number" class="form-control" id="quantity" min="1" name="quantity" value="{{ book.quantity }}" required>
+        </div>
 
-      <label for="price" class="form-label">Price</label>
-      <input type="number" class="form-control" id="price" min="0" step="any" name="price" value="{{ book.price }}" required>
+        <div class="mb-4">
+          <label for="price" class="form-label"><strong class="text-muted">Price</strong></label>
+          <input type="number" class="form-control" id="price" min="0" step="any" name="price" value="{{ book.price }}" required>
+        </div>
+      
+        <div class="mb-4">
+          <label for="summary" class="form-label"><strong class="text-muted">Summary</strong></label>
+          <textarea class="form-control" id="summary" name="summary" rows="10" required>{{ book.summary }}</textarea>
+        </div>
+      </div>
 
-      <label for="summary" class="form-label">Summary</label>
-      <textarea class="form-control" id="summary" name="summary" required>{{ book.summary }}</textarea>
+      <div class="col-md-6">
+        <div class="mb-4">
+          <label for="image" class="form-label"><strong class="text-muted">Current Image</strong></label>
+          <br>
+          <img src="{{ "../../.." + book.image[1::] }}" width="90" height="150" alt="Current Image" class="img-fluid">
+        </div>
 
-      <label for="image" class="form-label">Current Image</label>
-      <img src="{{ url_for('get_genre_image', genre_id=genre.id) }}" alt="Current Image">
+        <div class="mb-4">
+          <label for="image" class="form-label"><strong class="text-muted">Choose New Image</strong></label>
+          <input type="file" class="form-control" name="image">
+        </div>
 
-      <label for="image" class="form-label">Choose New Image</label>
-      <input type="file" class="form-control" name="image">
+        <div class="mb-4">
+          <label for="content" class="form-label"><strong class="text-muted">Current Content</strong></label>
+          <iframe src="{{ "../../.." + book.content[1::] }}" width="100%" height="340"></iframe>
+        </div>
 
-      <label for="content" class="form-label">Current Content</label>
-      <img src="{{ url_for('get_genre_image', genre_id=genre.id) }}" alt="Current Content">
+        <div class="mb-4">
+          <label for="content" class="form-label"><strong class="text-muted">Choose New Content</strong></label>
+          <input type="file" class="form-control" name="content">
+        </div>
+      </div>
 
-      <label for="image" class="form-label">Choose New Content</label>
-      <input type="file" class="form-control" name="content">
+      <div class="mb-4 text-center">
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-refresh me-2"></i> Update
+          </button>
+        </div>
+    </form>
+  </div>
+{% endblock %}
 
-      <button type="submit" class="btn btn-success"> <i class="fas fa-refresh"></i>  Update</button>
-    </div>
-  </form>
+{% block style %}
+
 {% endblock %}

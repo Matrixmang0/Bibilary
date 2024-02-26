@@ -1,83 +1,95 @@
 {% extends "layout.html" %}
 
 {% block title %}
-  {{ genre.name}} Books
+  {{ genre.name }} Books
 {% endblock %}
 
 {% block content %}
-  <h1 class="display-1">{{ genre.name}} Books</h1>
+  <div class="container mt-5">
+    <h1 class="display-3 text-center">{{ genre.name }} Books</h1>
 
-  <div class="heading">
-    <h2 class="text-muted">Books</h2>
-    <div class="d-grid gap-2 col-6 mx-auto">
-    <a type="button" href="{{ url_for("add_book", genre_id=genre.id) }}" class="btn btn-success btn-lg">
-      <i class="fas fa-plus"></i> Add Books
-    </a>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="text-muted">Books</h2>
+      <a href="{{ url_for("add_book", genre_id=genre.id) }}" class="btn btn-success btn-lg">
+        <i class="fas fa-plus"></i> Add Books
+      </a>
     </div>
-  </div>
 
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Book ID</th>
-        <th>Book Name</th>
-        <th>Quantity</th>
-        <th>Price</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for book in genre.books %}
+    <table class="table table-striped">
+      <thead>
         <tr>
-          <td>{{ book.id }}</td>
-          <td>{{ book.title }}</td>
-          <td>{{ book.quantity }}</td>
-          <td>{{ book.price }}</td>
-          <td>
-            <a href="{{ url_for("edit_book", genre_id=book.genre_id, book_id=book.id) }}" class="btn btn-warning">
-              <i class="fas fa-edit"></i> Edit
-            </a>
-            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-              <i class="fas fa-trash"></i> Delete
-            </button>
+          <th>Book ID</th>
+          <th>Book Name</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for book in genre.books %}
+          <tr>
+            <td>{{ book.id }}</td>
+            <td>{{ book.title }}</td>
+            <td>{{ book.quantity }}</td>
+            <td>{{ book.price }}</td>
+            <td>
+              <a href="{{ url_for("edit_book", genre_id=book.genre_id, book_id=book.id) }}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Edit
+              </a>
+              <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ book.id }}">
+                <i class="fas fa-trash"></i> Delete
+              </button>
 
-            <!-- Modal -->
-            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">Delete {{ book.title }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                    Are you sure want to delete the book {{ book.title }} from the genre {{ genre.name }}?
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <a href="{{ url_for("delete_book", book_id=book.id, genre_id=book.genre_id) }}" type="button" class="btn btn-danger" method="post">
-                      <i class="fas fa-trash"></i>  Delete
-                    </a>
+              <!-- Delete Modal -->
+              <div class="modal fade" id="deleteModal{{ book.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="deleteModalLabel">Delete {{ book.title }}</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      Are you sure you want to delete the book {{ book.title }} from the genre {{ genre.name }}?
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      <a href="{{ url_for("delete_book", book_id=book.id, genre_id=book.genre_id) }}" type="button" class="btn btn-danger" method="post">
+                        <i class="fas fa-trash"></i> Delete
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-    
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 {% endblock %}
-
 
 {% block style %}
   <style>
-    .heading {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
+    body {
+      background-color: #f8f9fa; /* Light gray background */
+    }
+
+    .container {
+      max-width: 1200px;
+    }
+
+    .btn-success {
+      background-color: #28a745; /* Bootstrap success button color */
+      border-color: #28a745; /* Bootstrap success button border color */
+    }
+
+    .btn-success:hover {
+      background-color: #218838; /* Darker shade on hover */
+      border-color: #218838; /* Darker shade on hover */
+    }
+
+    h2 {
+      margin : 30px 0 30px 0; /* Bootstrap dark gray heading color */
     }
   </style>
 {% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+{{ book.title }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="col text-center">
+      <img src="{{ "../../" + book.image[1::] }}" width="440" height="650" alt="{{ book.title }}">
+    </div>
+    <div class="col-7">
+      <h1 class="display-6"><strong>{{ book.title }}</strong></h1>
+      <p>by <span class="text-muted ml-1">{{ book.authors }}</span></p>
+      <p class="lead" style="text-align: justify; text-justify: inter-word;" id="bookSummary">&emsp;&emsp;&emsp;{{ book.summary }}</p>
+      <a href="#" id="readMoreLink" style="font-size: 24px;">Read More</a>
+    
+                                <div class="col book-actions d-flex justify-content-between align-items-center">
+                                  <a href="{{ url_for("show_book", book_id=book.id) }}" method="post" class="btn btn-success custom-btn">Open Book</a>
+                                  <a href="{{ url_for("feedback", book_id=book.id, user_id=session["user_id"]) }}" class="btn btn-primary custom-btn">Feedback</a>
+                                </div>  
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  const bookSummary = document.getElementById('bookSummary');
+  const readMoreLink = document.getElementById('readMoreLink');
+
+  const fullContent = bookSummary.innerHTML;
+
+  let contentLimit = 1080;
+
+  function toggleContent() {
+    if (bookSummary.innerHTML === fullContent) {
+      bookSummary.innerHTML = fullContent.substring(0, contentLimit) + '...';
+      readMoreLink.textContent = 'Read More';
+    } else {
+      bookSummary.innerHTML = fullContent;
+      readMoreLink.textContent = 'Read Less';
+    }
+  }
+
+  readMoreLink.addEventListener('click', toggleContent);
+  
+  if (fullContent.length > contentLimit) {
+    bookSummary.innerHTML = fullContent.substring(0, contentLimit) + '...';
+  }
+</script>
+{% endblock %}
+
+{% block style %}
+<style>
+.container {
+  display: flex;
+  max-width: 1500px;
+  flex-wrap: wrap;
+  margin: 100px auto;
+}
+
+.col {
+  flex: 1;
+  background-color: #f1f1f1;
+  margin: 10px;
+  padding: 20px;
+  font-size: 30px;
+}
+
+.col-7 {
+  flex: 2;
+  background-color: #f1f1f1;
+  margin: 10px;
+  padding: 20px;
+  font-size: 30px;
+}
+
+.custom-btn {
+        font-size: 25px; /* Adjust the font size as needed */
+        padding: 15px 20px; /* Adjust the padding as needed */
+    }
+</style>
+{% endblock %}

@@ -13,57 +13,81 @@
       <div class="genres">
         <h2>{{genre.name}}</h2>
         <hr>
-         <div class="books">
-               {% for book in genre.books %}
-                {% if (parameter=="book" and query.lower() in book.title.lower()) or (parameter == "price" and query >= book.price) or (parameter=="genre") or (not parameter) %}
-                    <div class="card" style="width: 14rem;">
-                      <img src="{{book.image}}" class="card-img-top" alt="...">
-                      <div class="card-body">
-                        <h5 class="card-title"><strong>{{ book.title }}</strong></h5>
-                        <p class="card-text"><span class="text-muted">Price :</span>&nbsp;&nbsp;<span style="color:red;">&#8377;{{ book.price }}</span></p>
-                        <div class="card-buttons">
-                          {% if book.quantity > 0 %}
-                            <a href="{{ url_for("add_to_cart", book_id=book.id) }}" method="post" class="btn btn-success">Add to cart</a>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop{{book.id}}">Borrow</button>
-                            
-                            <!-- Modal -->
-                            <div class="modal fade" id="staticBackdrop{{book.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                              <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                  <div class="modal-header">
-                                    <h5 class="modal-title" id="staticBackdropLabel">Day to Borrow</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                  </div>
-                                  <div class="modal-body">
-                                    Select the number of days you want to borrow the book {{ book.title }}.
-                                  </div>
-                                  <div class="modal-footer">
-                                    <form action="{{ url_for("add_to_request", book_id=book.id) }}" method="post">
-                                      <input type="number" class="form-control" name="days_requested" value="14" min="7" max="60">
-                                      <button type="submit" class="btn btn-primary" method="post">
-                                        Request
-                                      </button>
-                                    </form>
-                                  </div>
+           <div class="flex-container">
+             <div class="arrow arrow-left" onclick="scrollList('left')"><i class="fa-solid fa-arrow-left"></i></div>
+             <div class="scroll-container">
+                   {% for book in genre.books %}
+                    {% if (parameter=="book" and query.lower() in book.title.lower()) or (parameter == "price" and query >= book.price) or (parameter=="genre") or (not parameter) %}
+                        <div class="card" >
+                          <a href="{{ url_for("book", book_id=book.id) }}"><img src="{{book.image}}" class="card-img-top" height="250px" width="500px" alt="..."></a>
+                          <div class="card-body">
+                            <a href="{{ url_for("book", book_id=book.id) }}">
+                              <h6 class="card-title"><strong>{{ book.title }}</strong></h6>
+                            </a>
+                            <p class="card-text"><span class="text-muted">Price :</span>&nbsp;&nbsp;<span style="color:red;">&#8377;{{ book.price }}</span></p>
+                            <div class="card-buttons">
+                              {% if book.quantity > 0 %}
+                                <a href="{{ url_for("add_to_cart", book_id=book.id) }}" method="post" class="btn btn-success btn-sm">Add to cart</a>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop{{book.id}}">Borrow</button>
+             
+                                <!-- Modal -->
+                                <div class="modal fade" id="staticBackdrop{{ book.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-secondary bg-gradient text-white">
+                                                <h5 class="modal-title" id="staticBackdropLabel">Select Borrowing Duration</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p class="lead">Choose the number of days you want to borrow the book "{{ book.title }}".</p>
+                                                <form action="{{ url_for('add_to_request', book_id=book.id) }}" method="post">
+                                                    <div class="mb-3">
+                                                        <label for="daysRequested" class="form-label">Number of Days:</label>
+                                                        <input type="number" class="form-control" id="daysRequested" name="days_requested" value="14" min="7" max="60">
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <button type="submit" class="btn btn-primary">Request</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                              </div>
+
+             
+                              {% else %}
+                                <button class="btn btn-outline-danger" disabled><i class="fa-solid fa-x"></i>  Out of stock</button>
+                              {% endif %}
                             </div>
-                          
-                          {% else %}
-                            <button class="btn btn-outline-danger" disabled><i class="fa-solid fa-x"></i>  Out of stock</button>
-                          {% endif %}
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                {% endif %}
+                    {% endif %}
+                   {% endfor %}
+             </div>
+             <div class="arrow arrow-right" onclick="scrollList('right')"><i class="fa-solid fa-arrow-right"></i></div>
+           </div>
+            </div>
                {% endfor %}
+             </div>
          </div>
-      </div>
-    {% endfor %}
-  </div>
 {% endblock %}
 
+{% block script %}
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 
+  <script>
+    function scrollList(direction) {
+      const container = document.querySelector('.scroll-container');
+
+      if (direction === 'left') {
+        container.scrollLeft -= 220;
+      } else {
+        container.scrollLeft += 220;
+      }
+    }
+  </script>
+{% endblock %}
 
 {% block style %}
 <style>
@@ -83,18 +107,33 @@
     margin: 20px;
   }
 
+  .flex-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .genres {
     margin: 20px 0 20px 0;
   }
 
-  .books {
+  .scroll-container {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: left;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    width: 95%;
+    margin: 0 auto;
+  }
+
+  .scroll-container::-webkit-scrollbar {
+    display: none; 
   }
 
   .card {
-    margin: 10px;
+    flex: 0 0 auto;
+    margin: 0 10px;
+    width: 13rem;
+    height: 25rem;
   }
 
   .card-buttons {
@@ -102,6 +141,35 @@
     flex-direction: row;
     justify-content: space-between;
   }
+
+  .arrow {
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 20px;
+    color: #333;
+    margin-left: 5px;
+    margin-right: 5px;
+  }
+
+  .arrow-left {
+    right: 5px;
+  }
+
+  .arrow-right {
+    left: 5px;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+    color: blue;
+  }
+
 </style>
 {% endblock %}
 

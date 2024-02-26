@@ -5,69 +5,71 @@
 {% endblock %}
 
 {% block content %}
-  <h1 class="display-1">My Requests</h1>
+  <div class="container mt-5">
+    <h1 class="display-3 mb-4 text-center">My Requests</h1>
+    <br><br>
+    {% if requests %}
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Request ID</th>
+            <th>Book Title</th>
+            <th>Genre</th>
+            <th>Days Requested</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for request in requests %}
+            {% for book in books %}
+              {% if book.id == request.book_id %}
+                {% for genre in genres %}
+                  {% if genre.id == book.genre_id %}
+                    <tr>
+                      <td>{{ request.id }}</td>
+                      <td>{{ book.title }}</td>
+                      <td>{{ genre.name }}</td>
+                      <td>{{ request.days_requested }}</td>
+                      <td>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#revokeModal{{ request.id }}">
+                          <i class="fas fa-trash"></i> Revoke
+                        </button>
+                      </td>
+                    </tr>
 
-  {% if requests %}
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Request ID</th>
-          <th>Book Title</th>
-          <th>Genre</th>
-          <th>Days Requested</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for request in requests %}
-          {% for book in books %}
-            {% if book.id==request.book_id %}
-              {% for genre in genres %}
-                {% if genre.id==book.genre_id %}
-                      <tr>
-                        <td>{{ request.id }}</td>
-                        <td>{{ book.title }}</td>
-                        <td>{{ genre.name }}</td>
-                        <td>{{ request.days_requested }}</td>
-                        <td>
-                          <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-                            <i class="fas fa-trash"></i> Revoke
-                          </button>
-
-                          <!-- Modal -->
-                          <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                              <div class="modal-content">
-                                <div class="modal-header">
-                                  <h5 class="modal-title" id="staticBackdropLabel">Revoke {{ book.title }}</h5>
-                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                  Are you sure want to revoke the request for {{ book.title }}?
-                                </div>
-                                <div class="modal-footer">
-                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                  <a href="{{ url_for("revoke_request", request_id=request.id) }}" type="button" class="btn btn-danger" method="post">
-                                    <i class="fas fa-trash"></i>  Revoke
-                                  </a>
-                                </div>
-                              </div>
-                            </div>
+                    <!-- Revoke Modal -->
+                    <div class="modal fade" id="revokeModal{{ request.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="revokeModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                          <div class="modal-header bg-danger bg-gradient text-white">
+                            <h5 class="modal-title" id="revokeModalLabel">Revoke {{ book.title }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                           </div>
-                        </td>
-                      </tr>
-                {% endif %}
-              {% endfor %}
-            {% endif %}
-          {% endfor %}
-        {% endfor %}
-      </tbody>
-    </table>
+                          <div class="modal-body">
+                            <p class="lead">Are you sure you want to revoke the request for {{ book.title }}?</p>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <a href="{{ url_for("revoke_request", request_id=request.id) }}" type="button" class="btn btn-danger" method="post">
+                              <i class="fas fa-trash"></i> Revoke
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- End Revoke Modal -->
 
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
     {% else %}
       <div class="alert alert-info" role="alert">
-            <h5>You have not made any requests yet</h5>
+        <h5>You have not made any requests yet</h5>
       </div>
-  {% endif %}
-    
+    {% endif %}
+  </div>
 {% endblock %}

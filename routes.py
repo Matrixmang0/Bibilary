@@ -17,6 +17,7 @@ from models import (
     Purchase,
     Cart,
     Transaction,
+    Feedback,
     db,
 )
 from app import app
@@ -518,14 +519,32 @@ def edit_book_post(genre_id, book_id):
         flash("Book already exists")
         return redirect(url_for("edit_book", genre_id=genre_id, book_id=book_id))
 
+    if image:
+        image.filename = title + "." + image.filename.rsplit(".", 1)[1]
+        if allowed_file(image.filename):
+            filename = secure_filename(image.filename)
+            image_path = os.path.join(
+                app.config["UPLOAD_FOLDER"], "front-cover", filename
+            )
+            image.save(image_path)
+
+    if content:
+        content.filename = title + "." + content.filename.rsplit(".", 1)[1]
+        if content and allowed_file(content.filename):
+            filename = secure_filename(content.filename)
+            content_path = os.path.join(
+                app.config["UPLOAD_FOLDER"], "content", filename
+            )
+            content.save(content_path)
+
     book.title = title
     book.authors = authors
     book.genre_id = genre_id_f
     book.quantity = quantity
     book.price = price
     book.summary = summary
-    book.image = image.read() if image else book.image
-    book.content = content.read() if content else book.content
+    book.image = image_path if image else book.image
+    book.content = content_path if content else book.content
 
     db.session.commit()
     flash("Book updated successfully")
@@ -1056,3 +1075,81 @@ def return_borrow(borrow_id):
     db.session.commit()
     flash(f"Book {book.title} returned successfully")
     return redirect(url_for("my_borrows"))
+
+
+@app.route("/<int:book_id>/show_book")
+@auth_required
+def show_book(book_id):
+    book = Book.query.get(book_id)
+    if not book:
+        flash("Book not found")
+        return redirect(url_for("my_books"))
+    return render_template("show-book.html", book=book)
+
+
+@app.route("/book/<int:book_id>")
+def book(book_id):
+    book = Book.query.get(book_id)
+    if not book:
+        flash("Book not found")
+        return redirect(url_for("index"))
+    feedbacks = Feedback.query.filter_by(book_id=book_id).all()
+    users = User.query.all()
+    return render_template("book.html", feedbacks=feedbacks, book=book, users=users)
+
+
+@app.route("/accessed_book/<int:book_id>")
+@auth_required
+def accessed_book(book_id):
+    book = Book.query.get(book_id)
+    if not book:
+        flash("Book not found")
+        return redirect(url_for("my_books"))
+    return render_template("accessed_book.html", book=book)
+
+
+@app.route("/<int:user_id>/feedback/<int:book_id>")
+@auth_required
+def feedback(user_id, book_id):
+    purchases = Purchase.query.filter_by(user_id=user_id).all()
+    borrows = Borrow.query.filter_by(user_id=user_id).all()
+
+    if book_id not in [purchase.book_id for purchase in purchases]:
+        if book_id not in [borrow.book_id for borrow in borrows]:
+            flash("You do not have access to this book")
+            return redirect(url_for("index"))
+
+    user = User.query.get(user_id)
+    book = Book.query.get(book_id)
+
+    return render_template("book-feedback.html", book=book, user=user)
+
+
+@app.route("/<int:user_id>/feedback/<int:book_id>", methods=["POST"])
+@auth_required
+def feedback_post(user_id, book_id):
+
+    purchases = Purchase.query.filter_by(user_id=user_id).all()
+    borrows = Borrow.query.filter_by(user_id=user_id).all()
+
+    if book_id not in [purchase.book_id for purchase in purchases]:
+        if book_id not in [borrow.book_id for borrow in borrows]:
+            flash("You do not have access to this book")
+            return redirect(url_for("index"))
+
+    subject = request.form.get("subject")
+    ratings = request.form.get("ratings")
+    review = request.form.get("review")
+    feedback = Feedback(
+        user_id=user_id,
+        book_id=book_id,
+        subject=subject,
+        ratings=ratings,
+        review=review,
+    )
+    db.session.add(feedback)
+    db.session.commit()
+    flash("Feedback submitted successfully")
+
+    book = Book.query.get(book_id)
+    return redirect(url_for("accessed_book", book_id=book.id))

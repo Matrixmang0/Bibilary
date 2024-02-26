@@ -20,21 +20,19 @@
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.endpoint == 'index' }}" href="{{ url_for('index') }}"><i class="fa-solid fa-house"></i> Home</a>
         </li>
-        {% if "user_id" not in session %}
-        <li class="nav-item">
-          <a class="nav-link {{ 'active' if request.endpoint == 'login' }}" href="{{ url_for('login') }}"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {{ 'active' if request.endpoint == 'register' }}" href="{{ url_for('register') }}"><i class="fa-solid fa-cash-register"></i> Register</a>
-        </li>
-        {% endif %}
+        
       </ul>
 
       {% include 'searchbar.html' with context %}
 
-      {% if "user_id" in session %}
+      {% if request.endpoint == 'show_book' %}
+            <div class="text-center text-white">
+                <h1 class="display-5">{{book.title}}</h1>
+            </div>
+      {% endif %}
 
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+
         {% if session["user_id"] == 10000 %}
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.endpoint == 'user_stats' }}" href="{{ url_for('user_stats') }}"><i class="fa-solid fa-chart-simple"></i> User Stats</a>
@@ -45,7 +43,7 @@
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.endpoint == 'user_borrows' }}" href="{{ url_for('user_borrows') }}"><i class="fa-solid fa-hand-holding-hand"></i> Borrows</a>
         </li>
-        {% else %}
+        {% elif session["user_id"] %}
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('my_stats', user_id=session["user_id"]) }}"><i class="fa-solid fa-chart-simple"></i> My Stats</a>
         </li>
@@ -55,41 +53,62 @@
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.endpoint == 'cart' }}" href="{{ url_for('cart') }}"><i class="fa-solid fa-cart-shopping"></i> My Cart</a>
         </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.endpoint == 'login' }}" href="{{ url_for('login') }}"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.endpoint == 'register' }}" href="{{ url_for('register') }}"><i class="fa-solid fa-cash-register"></i> Register</a>
+        </li>
         {% endif %}
+        
+
       </ul>
 
-      {% endif %}
+    
 
       <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
 
-        <div class="dropdown" style="margin: 2px 2px ;">
-          <a class="btn btn-light" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-            {% if "user_id" in session %}
-              <div class="profile-img">
-              <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed={{ session["user_id"] }}" width="40" height="30" alt="Profile Image" class="img-fluid" />
-              </div>
-            {% else %}
-              <i class="fa-solid fa-user-large fa-2x"></i>
-            {% endif %}
-          </a>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-              {% if "user_id" in session %}
-                <li><a class="dropdown-item {{ 'active' if request.endpoint == 'profile' }}" href="{{ url_for('profile') }}">Profile</a></li>
-                {% if session["user_id"]!=10000 %}
-                  <li><a class="dropdown-item {{ 'active' if request.endpoint == 'orders' }}" href="{{ url_for('orders') }}">My Orders</a></li>
-                  <li><a class="dropdown-item {{ 'active' if request.endpoint == 'my_borrows' }}" href="{{ url_for('my_borrows') }}">My Borrows</a></li>
-                  <li><a class="dropdown-item {{ 'active' if request.endpoint == 'my_requests' }}" href="{{ url_for('my_requests', user_id=session["user_id"]) }}">Requests</a></li>
+        <div class="dropdown" style="margin: 2px 2px;">
+            <a class="btn btn-light" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                {% if "user_id" in session %}
+                    <div class="profile-img">
+                        <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed={{ session['user_id'] }}" width="40" height="40" alt="Profile Image" class="img-fluid rounded-circle" />
+                    </div>
+                {% else %}
+                    <i class="fa-solid fa-user-large fa-2x"></i>
                 {% endif %}
-                <a class="btn btn-danger" href="{{ url_for('logout') }}">
-                  Logout
-                </a>
-              {% else %}
-                <li><a class="dropdown-item {{ 'active' if request.endpoint == 'login' }}" href="{{ url_for('login') }}">Login</a></li>
-                <li><a class="dropdown-item {{ 'active' if request.endpoint == 'register' }}" href="{{ url_for('register') }}">Register</a></li>
-              {% endif %}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
+                {% if "user_id" in session %}
+                    <li><a class="dropdown-item {{ 'active' if request.endpoint == 'profile' }}" href="{{ url_for('profile') }}">Profile</a></li>
+                    {% if session['user_id'] != 10000 %}
+                        <li><a class="dropdown-item {{ 'active' if request.endpoint == 'orders' }}" href="{{ url_for('orders') }}">My Orders</a></li>
+                        <li><a class="dropdown-item {{ 'active' if request.endpoint == 'my_borrows' }}" href="{{ url_for('my_borrows') }}">My Borrows</a></li>
+                        <li><a class="dropdown-item {{ 'active' if request.endpoint == 'my_requests' }}" href="{{ url_for('my_requests', user_id=session['user_id']) }}">Requests</a></li>
+                    {% endif %}
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="logout-item"><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
+                {% else %}
+                    <li><a class="dropdown-item {{ 'active' if request.endpoint == 'login' }}" href="{{ url_for('login') }}">Login</a></li>
+                    <li><a class="dropdown-item {{ 'active' if request.endpoint == 'register' }}" href="{{ url_for('register') }}">Register</a></li>
+                {% endif %}
             </ul>
-          </div>
+        </div>
+
       <p>&nbsp;</p>
     </div>
   </div>
 </nav>
+
+
+<style>
+  .logout-item {
+        background-color: #ff6347; /* Red background color */
+    }
+
+    /* If you prefer inline styles */
+    .logout-item a {
+        background-color: #ff6347; /* Red background color */
+    }
+</style>

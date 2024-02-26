@@ -11,6 +11,9 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     passhash = db.Column(db.String(256), nullable=False)
     name = db.Column(db.String(120), nullable=False)
+    feedbacks = db.relationship(
+        "Feedback", cascade="all, delete-orphan", backref="user", lazy=True
+    )
     requests = db.relationship(
         "Request", cascade="all, delete-orphan", backref="user", lazy=True
     )
@@ -56,6 +59,9 @@ class Book(db.Model):
     summary = db.Column(db.String, nullable=False)
     image = db.Column(db.String, nullable=True)
     content = db.Column(db.String, nullable=False)
+    feedbacks = db.relationship(
+        "Feedback", cascade="all, delete-orphan", backref="book", lazy=True
+    )
     requests = db.relationship(
         "Request", cascade="all, delete-orphan", backref="book", lazy=True
     )
@@ -111,6 +117,15 @@ class Transaction(db.Model):
     purchase = db.relationship(
         "Purchase", cascade="all, delete-orphan", backref="transaction", lazy=True
     )
+
+
+class Feedback(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
+    subject = db.Column(db.String, nullable=False)
+    ratings = db.Column(db.Integer, nullable=False)
+    review = db.Column(db.String, nullable=False)
 
 
 with app.app_context():
