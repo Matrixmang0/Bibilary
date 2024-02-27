@@ -8,7 +8,7 @@ api = Api(app)
 class UserAPI(Resource):
     def get(self, user_id):
         users = User.query.filter_by(id=user_id).all()
-        if users is None:
+        if users == []:
             return {"message": "User not found"}, 404
         return {
             "users": [
@@ -26,7 +26,7 @@ class UserAPI(Resource):
 class LibrarianAPI(Resource):
     def get(self, librarian_id):
         librarians = Librarian.query.filter_by(id=librarian_id).all()
-        if librarians is None:
+        if librarians == []:
             return {"message": "Librarian not found"}, 404
         return {
             "librarian": [
@@ -44,7 +44,7 @@ class LibrarianAPI(Resource):
 class GenreAPI(Resource):
     def get(self, genre_id):
         genres = Genre.query.filter_by(id=genre_id).all()
-        if genres is None:
+        if genres == []:
             return {"message": "Genre not found"}, 404
         return {
             "genre": [
@@ -60,7 +60,7 @@ class GenreAPI(Resource):
 class BookAPI(Resource):
     def get(self, book_id):
         books = Book.query.filter_by(id=book_id).all()
-        if books is None:
+        if books == []:
             return {"message": "Book not found"}, 404
         return {
             "book": [
@@ -80,7 +80,7 @@ class BookAPI(Resource):
 class RequestAPI(Resource):
     def get(self, request_id):
         requests = Request.query.filter_by(id=request_id).all()
-        if requests is None:
+        if requests == []:
             return {"message": "Request not found"}, 404
         return {
             "request": [
@@ -97,7 +97,7 @@ class RequestAPI(Resource):
 class BorrowAPI(Resource):
     def get(self, borrow_id):
         borrows = Borrow.query.filter_by(id=borrow_id).all()
-        if borrows is None:
+        if borrows == []:
             return {"message": "Borrow not found"}, 404
         return {
             "borrow": [
@@ -110,7 +110,7 @@ class BorrowAPI(Resource):
 class PurchaseAPI(Resource):
     def get(self, purchase_id):
         purchases = Purchase.query.filter_by(id=purchase_id).all()
-        if purchases is None:
+        if purchases == []:
             return {"message": "Purchase not found"}, 404
         return {
             "purchase": [

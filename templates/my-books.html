@@ -7,29 +7,35 @@
   <h1 class="display-3 text-center">My Books</h1>
 
   <div class="showcase-books">
-    {% for genre in genres %}
-      <div class="genres">
-        <h2>{{genre.name}}</h2>
-        <hr>
-         <div class="books">
-               {% for book in genre.books %}
-                  {% if book in books %}
-                    {% if (parameter=="book" and query.lower() in book.title.lower()) or (parameter == "price" and query >= book.price) or (parameter=="genre") or (not parameter) %}
-                        <div class="card" style="width: 13rem;">
-                          <a href="{{ url_for("accessed_book", book_id=book.id) }}"><img src="{{book.image}}" height="250px" width="400px" class="card-img-top" alt="{{book.title}}"></a>
-                          <div class="card-body">
-                              <a href="{{ url_for("accessed_book", book_id=book.id) }}">
-                                <h6 class="card-title"><strong>{{ book.title }}</strong></h6>     
-                              </a>
-                            </link>       
+    {% if books %}
+      {% for genre in genres %}
+        <div class="genres">
+          <h2>{{genre.name}}</h2>
+          <hr>
+          <div class="books">
+                {% for book in genre.books %}
+                    {% if book in books %}
+                      {% if (parameter=="book" and query.lower() in book.title.lower()) or (parameter == "price" and query >= book.price) or (parameter=="genre") or (not parameter) %}
+                          <div class="card" style="width: 13rem;">
+                            <a href="{{ url_for("accessed_book", book_id=book.id) }}"><img src="{{book.image}}" height="250px" width="400px" class="card-img-top" alt="{{book.title}}"></a>
+                            <div class="card-body">
+                                <a href="{{ url_for("accessed_book", book_id=book.id) }}">
+                                  <h6 class="card-title"><strong>{{ book.title }}</strong></h6>     
+                                </a>
+                              </link>       
+                            </div>
                           </div>
-                        </div>
+                      {% endif %}
                     {% endif %}
-                  {% endif %}
-               {% endfor %}
-         </div>
+                {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="alert alert-info" role="alert">
+        <h5 class="text-center">You have not bought any books yet</h5>
       </div>
-    {% endfor %}
+    {% endif %}
   </div>
 {% endblock %}
 

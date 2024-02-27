@@ -1,0 +1,191 @@
+openapi: 3.0.0
+info:
+  title: Bibilary API
+  version: 1.0.0
+  description: An API for managing a library system
+paths:
+  /api/user/{user_id}:
+    get:
+      summary: Get user information by ID
+      parameters:
+        - name: user_id
+          in: path
+          description: ID of the user
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                id: 1
+                name: John Don
+                email: user@email.com
+                username: user
+        '404':
+          description: User not found
+          content:
+            application/json:
+              example:
+                message: User not found
+
+  /api/librarian/{librarian_id}:
+    get:
+      summary: Get librarian information by ID
+      parameters:
+        - name: librarian_id
+          in: path
+          description: ID of the librarian
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                id: 1
+                name: Librarian
+                email: librarian@email.com
+                username: librarian
+        '404':
+          description: Librarian not found
+          content:
+            application/json:
+              example:
+                message: Librarian not found
+
+  /api/genre/{genre_id}:
+    get:
+      summary: Get genre information by ID
+      parameters:
+        - name: genre_id
+          in: path
+          description: ID of the genre
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                id: 1
+                name: Horror
+        '404':
+          description: Genre not found
+          content:
+            application/json:
+              example:
+                message: Genre not found
+
+  /api/book/{book_id}:
+    get:
+      summary: Get book information by ID
+      parameters:
+        - name: book_id
+          in: path
+          description: ID of the book
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                id: 1
+                title: A Good Book
+                authors: Author 1, Author 2
+                price: 999.99
+                quantity: 11
+                summary: This books is about...
+        '404':
+          description: Book not found
+          content:
+            application/json:
+              example:
+                message: Book not found
+
+  /api/request/{request_id}:
+    get:
+      summary: Get request information by ID
+      parameters:
+        - name: request_id
+          in: path
+          description: ID of the request
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                id: 1
+                user_id: 3
+                book_id: 2
+        '404':
+          description: Request not found
+          content:
+            application/json:
+              example:
+                message: Request not found
+
+  /api/borrow/{borrow_id}:
+    get:
+      summary: Get borrow information by ID
+      parameters:
+        - name: borrow_id
+          in: path
+          description: ID of the borrow
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                id: 2
+                user_id: 5
+                book_id: 3
+        '404':
+          description: Borrow not found
+          content:
+            application/json:
+              example:
+                message: Borrow not found
+
+  /api/purchase/{purchase_id}:
+    get:
+      summary: Get purchase information by ID
+      parameters:
+        - name: purchase_id
+          in: path
+          description: ID of the purchase
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                id: 4
+                user_id: 1
+                book_id: 2
+        '404':
+          description: Purchase not found
+          content:
+            application/json:
+              example:
+                message: Purchase not found
