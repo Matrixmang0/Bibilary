@@ -82,6 +82,71 @@ paths:
             application/json:
               example:
                 message: Genre not found
+    post:
+      summary: Add a new genre
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '201':
+          description: Genre added
+          content:
+            application/json:
+              example:
+                id: 2
+                name: Fiction
+                description: Genre added
+                date_created: 2023-04-12T15:00:00Z
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              example:
+                message: Invalid input
+    put():
+      summary: Update genre information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Genre updated
+          content:
+            application/json:
+              example:
+                id: 2
+                name: Fiction
+                description: Genre updated
+                date_updated: 2023-04-12T15:00:00Z
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              example:
+                message: Invalid input
+    delete():
+      summary: Delete genre
+      responses:
+        '204':
+          description: Genre deleted
+        '404':
+          description: Genre not found
+          content:
+            application/json:
+              example:
+                message: Genre not found
 
   /api/book/{book_id}:
     get:

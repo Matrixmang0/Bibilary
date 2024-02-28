@@ -1,6 +1,8 @@
 from flask_restful import Resource, Api
 from app import app
-from models import User, Librarian, Genre, Book, Request, Borrow, Purchase
+from models import User, Librarian, Genre, Book, Request, Borrow, Purchase, db
+from flask import request
+import datetime
 
 api = Api(app)
 
@@ -51,10 +53,49 @@ class GenreAPI(Resource):
                 {
                     "id": genre.id,
                     "name": genre.name,
+                    "description": genre.description,
                 }
                 for genre in genres
             ]
         }
+
+    def post(self, genre_id):
+        args = request.get_json()
+        name = args.get("name")
+        description = args.get("description")
+        if Genre.query.filter_by(name=name).first():
+            return {"message": "Genre already exists"}, 400
+        if not name or not description:
+            return {"message": "Name and description are required"}, 400
+        new_genre = Genre(
+            name=name, description=description, date_created=datetime.datetime.now()
+        )
+        db.session.add(new_genre)
+        db.session.commit()
+        return {"message": "Genre added successfully"}, 201
+
+    def put(self, genre_id):
+        args = request.get_json()
+        genre = Genre.query.filter_by(id=genre_id).first()
+        if not genre:
+            return {"message": "Genre not found"}, 404
+        if "name" not in args and "description" in args:
+            genre.description = args.get("description", genre.description)
+        elif "name" in args and "description" not in args:
+            genre.name = args.get("name", genre.name)
+        elif "name" in args and "description" in args:
+            genre.name = args.get("name", genre.name)
+            genre.description = args.get("description", genre.description)
+        db.session.commit()
+        return {"message": "Genre updated successfully"}, 200
+
+    def delete(self, genre_id):
+        genre = Genre.query.filter_by(id=genre_id).first()
+        if not genre:
+            return {"message": "Genre not found"}, 404
+        db.session.delete(genre)
+        db.session.commit()
+        return {"message": "Genre deleted successfully"}, 200
 
 
 class BookAPI(Resource):
