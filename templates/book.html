@@ -53,39 +53,50 @@
     </div>
 </div>
 <div class="container2">
-  <h1 class="display-4 mb-4">Feedbacks</h1>
+  <h1 class="display-4">Feedbacks</h1>
 
-  {% for feedback in feedbacks %}
-    {% for user in users %}
-      {% if user.id == feedback.user_id %}
-        <div class="row mb-4">
-          <div class="col-md-2">
-            <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed={{ feedback.user_id }}" width="80" height="80" alt="Profile Image" class="profile-image" />
-          </div>
-          <div class="col-md-10">
-            <div class="card">
-              <div class="card-body">
-                <h3 class="card-title">{{ user.username }}</h3>
-                <p class="card-text">
-                  <span class="text-muted">
-                    {% for _ in range(feedback.ratings) %}
-                      <i class="fas fa-star text-warning"></i>
-                    {% endfor %}
-                    {% for _ in range(5 - feedback.ratings) %}
-                      <i class="far fa-star text-warning"></i>
-                    {% endfor %}
-                  </span>
-                </p>
-                <p class="card-text">{{ feedback.review }}</p>
+  {% if feedbacks %}
+    {% for feedback in feedbacks %}
+      {% for user in users %}
+        {% if user.id == feedback.user_id %}
+          <div class="row mb-4">
+            <div class="col-md-2">
+              <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed={{ feedback.user_id }}" width="80" height="80" alt="Profile Image" class="profile-image" />
+            </div>
+            <div class="col-md-10">
+              <div class="card">
+                <div class="card-body">
+                  <h3 class="card-title">{{ user.username }}</h3>
+                  <p class="card-text">
+                    <span class="text-muted">
+                      {% for _ in range(feedback.ratings) %}
+                        <i class="fas fa-star text-warning"></i>
+                      {% endfor %}
+                      {% for _ in range(5 - feedback.ratings) %}
+                        <i class="far fa-star text-warning"></i>
+                      {% endfor %}
+                    </span>
+                  </p>
+                  <p class="card-text">{{ feedback.review }}</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      {% endif %}
+        {% endif %}
+      {% endfor %}
     {% endfor %}
-  {% endfor %}
+  {% else %}
+  <br>
+    <div class="row">
+      <div class="col-md-12 text-center">
+        <div class="alert alert-info" role="alert">
+          <h4 class="alert-heading">No feedbacks yet.</h4>
+          <p class="mb-0">Buy or borrow the book and be the first to share your thoughts!</p>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 </div>
-
 
 {% endblock %}
 
@@ -124,12 +135,14 @@
   flex-wrap: wrap;
   margin: 50px auto 20px auto;
 }
-
+ 
 .container2 {
-  display: flex;
   max-width: 1300px;
-  flex-wrap: wrap;
   margin: 50px auto 20px auto;
+}
+
+.row.mb-4 {
+  width: 100%;
 }
 
 .profile-image {
