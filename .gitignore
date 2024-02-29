@@ -2,6 +2,7 @@
 venv
 __pycache__
 instance
-/.vscode
-static/book
-static/csv
+.vscode
+static/book/content/
+static/book/cover/
+static/csv/
