@@ -4,5 +4,5 @@ __pycache__
 instance
 .vscode
 static/book/content/
-static/book/cover/
+static/book/front-cover/
 static/csv/
