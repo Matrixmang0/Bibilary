@@ -78,6 +78,12 @@ def register_post():
     if not validate_email(email):
         flash("Please enter a valid email address")
         return redirect(url_for("register"))
+    
+    user = User.query.filter_by(email=email).first()
+
+    if user:
+        flash("Email already exists")
+        return redirect(url_for("register"))
 
     if len(password) < 8:
         flash("Password should be at least 8 characters long")

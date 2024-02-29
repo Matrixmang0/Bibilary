@@ -137,7 +137,7 @@ with app.app_context():
             id=10000,
             username="librarian",
             email="librarian@email.com",
-            passhash=generate_password_hash("1234"),
+            passhash=generate_password_hash("12QWasZX"),
             name="Librarian",
         )
         db.session.add(librarian)
