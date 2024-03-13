@@ -6,7 +6,6 @@ import datetime
 
 api = Api(app)
 
-
 class UserAPI(Resource):
     def get(self, user_id):
         users = User.query.filter_by(id=user_id).all()
